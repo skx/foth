@@ -107,7 +107,7 @@ func (e *Eval) Eval(args []string) {
 			if tok == ";" {
 				e.Dictionary = append(e.Dictionary, e.tmp)
 				e.tmp.Name = ""
-				e.tmp.Words = []int{}
+				e.tmp.Words = []float64{}
 				e.compiling = false
 				continue
 
@@ -118,7 +118,7 @@ func (e *Eval) Eval(args []string) {
 			idx := e.findWord(tok)
 			if idx >= 0 {
 				// Found it
-				e.tmp.Words = append(e.tmp.Words, idx)
+				e.tmp.Words = append(e.tmp.Words, float64(idx))
 			} else {
 
 				// OK we assume the user entered a number
@@ -169,8 +169,26 @@ func (e *Eval) evalWord(index int) {
 	if word.Function != nil {
 		word.Function()
 	} else {
+		addNum := false
+
 		for _, offset := range word.Words {
-			e.evalWord(offset)
+
+			// adding a number?
+			if addNum {
+				// add to stack
+				e.Stack.Push(offset)
+				addNum = false
+			} else {
+
+				// if we see -1 we're adding a number
+				if offset == -1 {
+					addNum = true
+				} else {
+
+					// otherwise eval as usual
+					e.evalWord(int(offset))
+				}
+			}
 		}
 	}
 }
