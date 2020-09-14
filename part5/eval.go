@@ -230,7 +230,7 @@ func (e *Eval) evalWord(index int) {
 			cur := e.Stack.Pop()
 			max := e.Stack.Pop()
 
-			if max != cur {
+			if max > cur {
 				// put them back
 				e.Stack.Push(max)
 				e.Stack.Push(cur)
