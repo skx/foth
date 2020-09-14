@@ -1,3 +1,9 @@
+* [foth](#foth)
+  * [Implementation Overview](#implementation-overview)
+    * [Part 1](#part-1)
+    * [Part 2](#part-2)
+
+
 # foth
 
 A simple implementation of a forth-like (hence foth) language, as
