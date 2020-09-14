@@ -6,6 +6,7 @@
     * [Part 4](#part-4)
     * [Part 5](#part-5)
   * [TODO](#todo)
+  * [BUGS](#bugs)
 
 
 # foth
@@ -123,3 +124,21 @@ on the stack.
 ## TODO
 
 Control-Flow (i.e. "if").
+
+## BUGS
+
+loop condition-testing isn't correct:
+
+```
+     > : star 42 emit ;
+     > : stars 0 do star loop 10 emit ;
+     > 3 stars
+     ***
+     > 1 stars
+     *
+     > 0 stars
+     *
+     ^D
+```
+
+Should test in the `do` maybe?  Before the first iteration?
