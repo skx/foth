@@ -71,8 +71,11 @@ This means we've removed the `square` implementation, because you can add your o
      go build .
      ./part3
      > : square dup * ;
-     > 3 square .
-     9.000000
+     > : cube dup square * ;
+     > 3 cube .
+     27.000000
+     > 25 square .
+     625.000000
      ^D
 
 **NOTE**: We don't support using numbers in definitions, yet.  That will come in part4!
