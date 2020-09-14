@@ -2,11 +2,14 @@
   * [Implementation Overview](#implementation-overview)
     * [Part 1](#part-1)
     * [Part 2](#part-2)
+    * [Part 3](#part-3)
+    * [Part 4](#part-4)
+  * [TODO](#todo)
 
 
 # foth
 
-A simple implementation of a forth-like (hence foth) language, as
+A simple implementation of a FORTH-like, hence _foth_, language, as
 described in the following Hacker News comment:
 
 * https://news.ycombinator.com/item?id=13082825
@@ -68,8 +71,29 @@ This means we've removed the `square` implementation, because you can add your o
      go build .
      ./part3
      > : square dup * ;
-     > 3 square
+     > 3 square .
      9.000000
      ^D
 
 **NOTE**: We don't support using numbers in definitions, yet.  That will come in part4!
+
+
+### Part 4
+
+Part four allows the user to define their own words, including the use of numbers, from within the REPL.
+
+Here the magic is handling the input of numbers when in "compiling mode".
+
+     cd part4
+     go build .
+     ./part4
+     > : add1 1 + ;
+     > 3 add1 .
+     ^D
+
+**NOTE**: We don't support using numbers in definitions, yet.  That will come in part4!
+
+
+## TODO
+
+Control-Flow (i.e. "if", "do .. loop").
