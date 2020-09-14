@@ -1,6 +1,8 @@
 // This file contains the built-in facilities we have hard-coded.
 //
 // That means the implementation for "+", "-", "/", "*", and "print".
+//
+// Compared to part1 we've added `dup`.
 
 package main
 
