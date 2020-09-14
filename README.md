@@ -55,3 +55,21 @@ top number on the stack.
      > 3 dup + .
      6.000000
      ^D
+
+
+### Part 3
+
+Part three allows the user to define their own words, right from within the
+REPL!
+
+This means we've removed the `square` implementation, because you can add your own:
+
+     cd part3
+     go build .
+     ./part3
+     > : square dup * ;
+     > 3 square
+     9.000000
+     ^D
+
+**NOTE**: We don't support using numbers in definitions, yet.  That will come in part4!
