@@ -88,11 +88,13 @@ Here the magic is handling the input of numbers when in "compiling mode".
      go build .
      ./part4
      > : add1 1 + ;
-     > 3 add1 .
+     > -100 add1 .
+     -99.000000
+     > 4 add1 .
+     5.000000
      ^D
 
-**NOTE**: We don't support using numbers in definitions, yet.  That will come in part4!
-
+This just required adding a little state to our evaluation of words.
 
 ## TODO
 
