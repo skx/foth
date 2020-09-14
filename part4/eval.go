@@ -1,4 +1,4 @@
-// part3 - allow defining words in our own environment.
+// part4 - allow defining words in our own environment, even with numbers!
 package main
 
 import (
