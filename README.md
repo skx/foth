@@ -4,6 +4,7 @@
     * [Part 2](#part-2)
     * [Part 3](#part-3)
     * [Part 4](#part-4)
+    * [Part 5](#part-5)
   * [TODO](#todo)
 
 
@@ -99,6 +100,26 @@ Here the magic is handling the input of numbers when in "compiling mode".
 
 This just required adding a little state to our evaluation of words.
 
+
+### Part 5
+
+This part adds `do`, `emit`, and `loop`, allowing simple loops:
+
+    cd part5
+    go build .
+    ./part5
+    > : star 42 emit ;
+    > : stars 0 do star loop 10 emit ;
+    > 10 stars
+    **********
+    > 3 stars
+    ***
+    ^D
+
+Here `do` is a NOP, and the `loop` instruction handles a pair of values
+on the stack.
+
+
 ## TODO
 
-Control-Flow (i.e. "if", "do .. loop").
+Control-Flow (i.e. "if").
