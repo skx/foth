@@ -24,7 +24,7 @@ type Word struct {
 	//
 	// The indexes here are relative to the Dictionary our evaluator
 	// holds/maintains
-	Words []float64
+	Words []int
 }
 
 // Eval is our evaluation structure
@@ -119,21 +119,6 @@ func (e *Eval) Eval(args []string) {
 			if idx >= 0 {
 				// Found it
 				e.tmp.Words = append(e.tmp.Words, idx)
-			} else {
-
-				// OK we assume the user entered a number
-				// so we save a magic "-1" flag in our
-				// definition, and then the number itself
-				e.tmp.Words = append(e.tmp.Words, -1)
-
-				// Convert to float
-				val, err := strconv.ParseFloat(tok, 64)
-				if err != nil {
-					fmt.Printf("%s: %s\n", tok, err.Error())
-					return
-				}
-				e.tmp.Words = append(e.tmp.Words, val)
-
 			}
 
 			continue
