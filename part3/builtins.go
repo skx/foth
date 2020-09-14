@@ -1,6 +1,9 @@
 // This file contains the built-in facilities we have hard-coded.
 //
 // That means the implementation for "+", "-", "/", "*", and "print".
+//
+// Compared to part3 we've added a word for ":" to allow defining words
+// via manipulation of the "compiling" flag.
 
 package main
 
@@ -43,8 +46,9 @@ func (e *Eval) dup() {
 	e.Stack.Push(a)
 }
 
-// startDefinition moves us into compiling-mode
+// startDefinition moves us into compiling-mode.
+//
+// Note the interpreter handles removing this when it sees ";"
 func (e *Eval) startDefinition() {
 	e.compiling = true
-
 }
