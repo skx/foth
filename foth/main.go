@@ -9,6 +9,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -45,7 +46,9 @@ func doInit(eval *eval.Eval, path string) error {
 	}
 
 	if err != nil {
-		return err
+		if err != io.EOF {
+			return err
+		}
 	}
 
 	err = handle.Close()
@@ -67,11 +70,13 @@ func main() {
 	doInit(forth, "foth.4th")
 
 	// If we got any arguments treat them as files to lead
-	for _, file := range os.Args[1:] {
-		err := doInit(forth, file)
-		if err != nil {
-			fmt.Printf("error running %s: %s\n", file, err.Error())
-			return
+	if len(os.Args) > 1 {
+		for _, file := range os.Args[1:] {
+			err := doInit(forth, file)
+			if err != nil {
+				fmt.Printf("error running %s: %s\n", file, err.Error())
+				return
+			}
 		}
 		return
 	}
