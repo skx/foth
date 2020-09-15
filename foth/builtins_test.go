@@ -129,6 +129,177 @@ func TestEmit(t *testing.T) {
 	}
 }
 
+func TestEq(t *testing.T) {
+
+	e := NewEval()
+
+	// empty stack
+	err := e.eq()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// only one item
+	e.Stack.Push(1)
+	err = e.eq()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// two items
+	e.Stack.Push(1)
+	e.Stack.Push(1)
+	err = e.eq()
+	if err != nil {
+		t.Fatalf("expected no error, but got one")
+	}
+
+	// equal
+	x, _ := e.Stack.Pop()
+	if x != 1 {
+		t.Fatalf("eq() failed")
+	}
+
+	// two items
+	e.Stack.Push(12)
+	e.Stack.Push(1)
+	err = e.eq()
+	if err != nil {
+		t.Fatalf("expected no error, but got one")
+	}
+
+	// non-equal
+	x, _ = e.Stack.Pop()
+	if x != 0 {
+		t.Fatalf("eq() failed")
+	}
+}
+
+func TestGt(t *testing.T) {
+
+	e := NewEval()
+
+	// empty stack
+	err := e.gt()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// only one item
+	e.Stack.Push(1)
+	err = e.gt()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// two items
+	e.Stack.Push(10)
+	e.Stack.Push(1)
+	err = e.gt()
+	if err != nil {
+		t.Fatalf("expected no error, but got one")
+	}
+
+	// gt
+	x, _ := e.Stack.Pop()
+	if x != 1 {
+		t.Fatalf("gt() failed")
+	}
+
+	// two items
+	e.Stack.Push(1)
+	e.Stack.Push(1)
+	err = e.gt()
+	if err != nil {
+		t.Fatalf("expected no error, but got one")
+	}
+
+	// not-gt
+	x, _ = e.Stack.Pop()
+	if x != 0 {
+		t.Fatalf("gt() failed")
+	}
+}
+
+func TestGtEq(t *testing.T) {
+
+	e := NewEval()
+
+	// empty stack
+	err := e.gtEq()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// only one item
+	e.Stack.Push(1)
+	err = e.gtEq()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// two items
+	e.Stack.Push(1)
+	e.Stack.Push(1)
+	err = e.gtEq()
+	if err != nil {
+		t.Fatalf("expected no error, but got one")
+	}
+
+	// gt
+	x, _ := e.Stack.Pop()
+	if x != 1 {
+		t.Fatalf(">=() failed")
+	}
+
+	// two items
+	e.Stack.Push(-1)
+	e.Stack.Push(1)
+	err = e.gtEq()
+	if err != nil {
+		t.Fatalf("expected no error, but got one")
+	}
+
+	// not->=
+	x, _ = e.Stack.Pop()
+	if x != 0 {
+		t.Fatalf("gt() failed")
+	}
+}
+
+func TestInvert(t *testing.T) {
+
+	e := NewEval()
+
+	// empty stack
+	err := e.invert()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// 0 -> 1
+	e.Stack.Push(0)
+	e.invert()
+	out, err2 := e.Stack.Pop()
+	if err2 != nil {
+		t.Errorf("unexpected error")
+	}
+	if out != 1 {
+		t.Errorf("unexpected result")
+	}
+
+	// 10 -> 0
+	e.Stack.Push(10)
+	e.invert()
+	out, err2 = e.Stack.Pop()
+	if err2 != nil {
+		t.Errorf("unexpected error")
+	}
+	if out != 0 {
+		t.Errorf("unexpected result")
+	}
+
+}
 func TestIff(t *testing.T) {
 
 	e := NewEval()
