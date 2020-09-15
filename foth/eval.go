@@ -248,7 +248,7 @@ func (e *Eval) Eval(args []string) {
 //
 func (e *Eval) evalWord(index int) {
 
-	// Lookup the word
+	// Lookup the word in our dictionary.
 	word := e.Dictionary[index]
 
 	// Is this implemented in golang?  If so just invoke the function
@@ -328,18 +328,14 @@ func (e *Eval) evalWord(index int) {
 		} else {
 
 			// if we see -1 we're adding a number
-			if opcode == -1 {
+			switch opcode {
+			case -1:
 				addNum = true
-			} else if opcode == -2 {
-				// -2 is a jump
+			case -2:
 				jump = true
-			} else if opcode == -3 {
-				// -3 is a conditional-jump
+			case -3:
 				condJump = true
-			} else {
-
-				// otherwise we evaluate
-				// otherwise eval as usual
+			default:
 				e.evalWord(int(opcode))
 			}
 		}
