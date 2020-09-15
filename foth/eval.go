@@ -39,6 +39,9 @@ type Eval struct {
 	// Are we in a compiling mode?
 	compiling bool
 
+	// Are we in debug-mode?
+	debug bool
+
 	// Temporary word we're compiling
 	tmp Word
 
@@ -54,6 +57,10 @@ func NewEval() *Eval {
 
 	// Empty structure
 	e := &Eval{}
+
+	if os.Getenv("DEBUG") != "" {
+		e.debug = true
+	}
 
 	// Populate the dictionary of words we have implemented
 	// which are hard-coded.
@@ -122,6 +129,12 @@ func (e *Eval) Eval(args []string) {
 			// End of a definition?
 			if tok == ";" {
 				e.Dictionary = append(e.Dictionary, e.tmp)
+
+				// Show what we compiled each new definition
+				// to, when running in debug-mode
+				if e.debug {
+					e.dumpWords()
+				}
 
 				e.tmp.Name = ""
 				e.tmp.Words = []float64{}
@@ -341,4 +354,31 @@ func (e *Eval) findWord(name string) int {
 		}
 	}
 	return -1
+}
+
+func (e *Eval) dumpWords() {
+	codes := []string{}
+
+	// Show the names of the codes,
+	// as well as their indexes
+	off := 0
+	for off < len(e.tmp.Words) {
+
+		v := e.tmp.Words[int(off)]
+
+		if v == -1 {
+			codes = append(codes, fmt.Sprintf("%f", e.tmp.Words[off+1]))
+			off++
+		} else if v == -2 {
+			codes = append(codes, fmt.Sprintf("[jmp %f]", e.tmp.Words[off+1]))
+			off++
+		} else if v == -3 {
+			codes = append(codes, fmt.Sprintf("[cond-jmp %f]", e.tmp.Words[off+1]))
+			off++
+		} else {
+			codes = append(codes, fmt.Sprintf("%s", e.Dictionary[int(v)].Name))
+		}
+		off++
+	}
+	fmt.Printf("Compiled word '%s' -> %s\n", e.tmp.Name, strings.Join(codes, " "))
 }
