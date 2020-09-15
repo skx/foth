@@ -1,10 +1,11 @@
 * [foth](#foth)
   * [Implementation Overview](#implementation-overview)
-    * [Part 1](#part-1)
-    * [Part 2](#part-2)
-    * [Part 3](#part-3)
-    * [Part 4](#part-4)
-    * [Part 5](#part-5)
+    * [Part 1](#part-1) - Minimal initial-implementation.
+    * [Part 2](#part-2) - Hard-coded recursive word definitions.
+    * [Part 3](#part-3) - Allow defining minimal words via the REPL.
+    * [Part 4](#part-4) - Allow defining improved words via the REPL.
+    * [Part 5](#part-5) - Allow executing loops via `do`/`loop`.
+    * [Part 6](#part-6) - Allow conditional execution via `if`/`then`.
   * [TODO](#todo)
   * [BUGS](#bugs)
 
@@ -13,6 +14,10 @@
 
 A simple implementation of a FORTH-like language, hence _foth_ which is
 close to _forth_.
+
+If you're new to FORTH then the following wikipedia page is a good starting point:
+
+* [Forth](https://en.wikipedia.org/wiki/Forth_(programming_language))
 
 This repository was implemented based upon the following Hacker News comment:
 
@@ -24,20 +29,35 @@ The feature-set is pretty minimal:
 * Support for floating-point numbers (anything that will fit in a float64).
 * Support for printing the top-most stack element (`.`, or `print`).
 * Support for outputting ASCII characters (`emit`).
-* Support for loops.
+* Support for loops, via `do`/`loop`.
+* Support for conditional-execution, via `if`/`then`.
+
+The code evolves through a series of steps, guided by the comment-linked, ultimately we hope to end up with a featurefull final revision which is actually somewhat useable, and which could be embedded in a host application to easily support user-scripting.
+
+While you could improve things further from this final step I'm going to stop there, because I think I've done enough for the moment.  If you did want to extend further then there _are_ some obvious things to add:
+
+* Support for strings.
+* Support for comments.
+* Adding more of the "standard" FORTH-words.
+* Case-insensitive lookup of words.
+  * e.g. "dup" should act the same way as "DUP".
+
 
 
 ## Implementation Overview
 
 Each subdirectory gets a bit further down the comment-chain.
 
-In terms of implementation two files are identical in each example:
+In terms of implementation two files are _largely_ unchanged in each example:
 
-* `stack.go` contains a simple `float64` stack.
-* `main.go` contains a simple driver.
+* `stack.go`, which contains a simple stack of `float64` numbers.
+* `main.go`, contains a simple REPL/driver.
+  * The final few examples will also allow loading a startup-file, if present.
 
-Each example has a slightly improving set of built-in functions implemented
-in golang, which you can see in `builtins.go`.
+Each example builds upon the previous ones, with a pair of implementation files that change:
+
+* `builtins.go` contains the words implemented in golang.
+* `eval.go` is the workhorse which implements to FORTH-like interpreter.
 
 
 ### Part 1
@@ -59,14 +79,14 @@ See [part1/](part1/) for details.
 
 ### Part 2
 
-Part two allows defining new words in terms of others, internally we now
-allow recursive use of previously-defined words, as well as the built-in
-functions.
+Part two allows the definition of new words in terms of existing ones,
+which can even happen recursively.
 
-We've added `dup` to pop an item off the stack, and push it back twice - essentially duplicating it.
+We've added `dup` to pop an item off the stack, and push it back twice, which
+has the ultimate effect of duplicating it.
 
-To demonstrate the self-definition there is the new function `square` which squares the
-top number on the stack.
+To demonstrate the self-definition there is the new function `square` which
+squares the number at the top of the stack.
 
      cd part2
      go build .
@@ -126,7 +146,11 @@ See [part4/](part4/) for details.
 
 ### Part 5
 
-This part adds `do`, `emit`, and `loop`, allowing simple loops:
+This part adds `do`, `emit`, and `loop`, allowing simple loops.
+
+(Emit outputs the ASCII character stored in the topmost stack-entry)
+
+Sample usage would look like this - note that the character `*` has the ASCII code 42:
 
     cd part5
     go build .
@@ -146,16 +170,81 @@ See [part5/](part5/) for details.
 
 
 
-## TODO
+### Part 6
 
-- Add "==", "<", "<=", ">", ">=" operations.
-  - Push 1 or 0 on the stack depending on the result.
-- Implement if-offset to allow conditionals
-  - Using the previous operators.
-- Test-cases.
-- Declare and document a "final" version:
-  - Load any primitives from "`./foth.4th`", if present.
-  - Allow executing file-contents, not just a REPL.
+This update adds a lot of new primitives to our dictionary of predefined words:
+
+* `drop` - Removes an item from the stack.
+* `swap` - Swaps the top-most two stack-items.
+* `words` - Outputs a list of all defined words.
+* `<`, `<=`, `=` (`==` as a synonym), `>`, `>=`
+  * Remove two items from the stack, and compare them appropriately.
+  * If the condition is true push `1` onto the stack, otherwise `0`.
+* The biggest feature here is the support for using `if` & `then`, which allow conditional actions to be carried out.
+  * (These are why we added the comparison operations.)
+
+In addition to these new primitives the driver, `main.go`, was updated to load and evaluate [foth.4th](part6/foth.4th) on-startup if it is present.
+
+Sample usage:
+
+    cd part6
+    go build .
+    ./part6
+    > : hot 72 emit 111 emit 116 emit 10 emit ;
+    > : cold 67 emit 111 emit 108 emit 100 emit 10 emit ;
+    > : test_hot  0 > if hot then ;
+    > : test_cold  0 <= if cold then ;
+    > : test dup test_hot test_cold ;
+    > 10 test
+    Hot
+    > 0 test
+    Cold
+    > -1 test
+    Cold
+    > 10 test_hot
+    Hot
+    > 10 test_cold
+    > -1 test_cold
+    Cold
+    ^D
+
+See [part6/](part6/) for the code.
+
+**NOTE**: The `if` handler allows:
+
+   : foo $COND IF word1 [word2 .. wordN] then [more_word1 more_word2 ..] ;
+
+This means if the condition is true then we run `word1`, `word2` .. and otherwise we skip them, and continue running after the `then` statement.  Specifically note there is **no support for `else`**.  That is why we call the `test_host` and `test_cold` words in our `test` definition.  Each word tests separately.
+
+As an example:
+
+    > : foo 0 > if star star then star star cr ;
+
+If the test-passes, because you give a positive number, you'll see FOUR stars.  if it fails you just get TWO:
+
+     > 2 foo
+     ****
+     > 1 foo
+     ****
+     > 0 foo
+     **
+     > -1 foo
+     **
+
+This is because the code is synonymous with the following C-code:
+
+     if ( x > 0 ) {
+        printf("*");
+        printf("*");
+     }
+     printf("*");
+     printf("*");
+     printf("\n");
+
+I found this page useful, it also documents `invert` which I added for completeness:
+
+* https://www.forth.com/starting-forth/4-conditional-if-then-statements/
+
 
 
 
