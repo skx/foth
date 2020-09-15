@@ -254,7 +254,7 @@ I found this page useful, it also documents `invert` which I added for completen
 
 ### Final Revision
 
-The final version is largely identical to the previous part, in the sense that there are no significant new additions to the interpreter, or the predefined list of words.
+The final version, stored beneath [foth/](foth/), is largely identical to the previous part, in the sense that there are no significant new additions to the interpreter, or the predefined list of words.
 
 The aim of the final-version was to add test-cases, ensure that the code is more idiomatic, etc.
 
@@ -263,6 +263,7 @@ Changes here:
 * Added debug output if ${DEBUG} is non-empty.
 * Added test-cases.
 * Removed all uses of `os.Exit()`.
+  * We return `error` objects where appropriate, allowing the caller to detect problems.
 * Make redefining existing words possible.
   * Note that due to our implementation previously defined words remain unchanged, even if a word is replaced/updated.
 
