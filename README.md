@@ -6,6 +6,7 @@
     * [Part 4](#part-4) - Allow defining improved words via the REPL.
     * [Part 5](#part-5) - Allow executing loops via `do`/`loop`.
     * [Part 6](#part-6) - Allow conditional execution via `if`/`then`.
+    * [Final Revision](#final-revision)
   * [TODO](#todo)
   * [BUGS](#bugs)
 
@@ -32,7 +33,7 @@ The feature-set is pretty minimal:
 * Support for loops, via `do`/`loop`.
 * Support for conditional-execution, via `if`/`then`.
 
-The code evolves through a series of steps, guided by the comment-linked, ultimately we hope to end up with a featurefull final revision which is actually somewhat useable, and which could be embedded in a host application to easily support user-scripting.
+The code evolves through a series of steps, guided by the comment-linked, ultimately ending with a featurefull [final revision](#final-revision) which is actually somewhat useable, and which could be embedded in a host application to easily support user-scripting.
 
 While you could improve things further from this final step I'm going to stop there, because I think I've done enough for the moment.  If you did want to extend further then there _are_ some obvious things to add:
 
@@ -245,6 +246,28 @@ I found this page useful, it also documents `invert` which I added for completen
 
 * https://www.forth.com/starting-forth/4-conditional-if-then-statements/
 
+
+
+
+### Final Revision
+
+The final version is largely identical to the previous part, in the sense that there are no significant new additions to the interpreter, or the predefined list of words.
+
+The aim of the final-version was to add test-cases, ensure that the code is more idiomatic, etc.
+
+Changes here:
+
+* Added debug output if ${DEBUG} is non-empty.
+* Added test-cases.
+* Removed all uses of `os.Exit()`.
+* Make redefining existing words possible.
+  * Note that due to our implementation previously defined words remain unchanged, even if a word is replaced/updated.
+
+TODO:
+
+* Add `else` support to our `if` & `then` primitives
+
+See [foth/](foth/) for the implementation.
 
 
 
