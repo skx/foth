@@ -7,7 +7,6 @@
     * [Part 5](#part-5) - Allow executing loops via `do`/`loop`.
     * [Part 6](#part-6) - Allow conditional execution via `if`/`then`.
     * [Final Revision](#final-revision)
-  * [TODO](#todo)
   * [BUGS](#bugs)
   * [Github Setup](#github-setup)
 
