@@ -5,15 +5,20 @@ go get -u golang.org/x/lint/golint
 go get -u honnef.co/go/tools/cmd/staticcheck
 
 # Run the static-check tool
-t=$(mktemp)
-staticcheck -checks all ./... > $t
-if [ -s $t ]; then
-    echo "Found errors via 'staticcheck'"
-    cat $t
+for i in */; do
+    echo "Running golint on $i"
+    cd $i
+    t=$(mktemp)
+    staticcheck -checks all ./... > $t
+    if [ -s $t ]; then
+        echo "Found errors via 'staticcheck'"
+        cat $t
+        rm $t
+        exit 1
+    fi
     rm $t
-    exit 1
-fi
-rm $t
+    cd ..
+done
 
 
 
