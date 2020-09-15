@@ -82,12 +82,6 @@ func NewEval() *Eval {
 // This is invoked by our repl with a line of input at the time.
 func (e *Eval) Eval(args []string) {
 
-	//
-	// token = NextToken()
-	// if token is in dictionary
-	//   call function from that dict entry
-	// else if token is a number
-	//  push that number onto the data stack
 	for _, tok := range args {
 
 		// Trim the leading/trailing spaces,
