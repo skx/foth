@@ -62,3 +62,21 @@ func TestEvalWord(t *testing.T) {
 	}
 
 }
+
+func TestFloatFail(t *testing.T) {
+
+	tests := []string{": foo. 3.2.1.2 emit ; foo.",
+		"6.7.8.9 ."}
+
+	for _, str := range tests {
+		e := New()
+		err := e.Eval(strings.Split(str, " "))
+		if err == nil {
+			t.Fatalf("expected error processing '%s', got none", str)
+		}
+		if !strings.Contains(err.Error(), "failed to convert") {
+			t.Fatalf("got an error, but the wrong one: %s", err.Error())
+		}
+	}
+
+}
