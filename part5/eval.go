@@ -8,12 +8,6 @@ import (
 	"strings"
 )
 
-// Loop holds a loop - as these can be nested
-type Loop struct {
-	cur int
-	max int
-}
-
 // Word is the structure for a single word
 type Word struct {
 	// Name is the name of the function "+", "print", etc.
