@@ -53,6 +53,9 @@ with the ability to print the top-most entry of the stack:
      45.000000
      ^D
 
+See [part1/](part1/) for details.
+
+
 
 ### Part 2
 
@@ -74,6 +77,9 @@ top number on the stack.
      6.000000
      ^D
 
+See [part2/](part2/) for details.
+
+
 
 ### Part 3
 
@@ -93,14 +99,16 @@ This means we've removed the `square` implementation, because you can add your o
      625.000000
      ^D
 
+See [part3/](part3/) for details.
+
 **NOTE**: We don't support using numbers in definitions, yet.  That will come in part4!
 
 
 ### Part 4
 
-Part four allows the user to define their own words, including the use of numbers, from within the REPL.
+Part four allows the user to define their own words, including the use of numbers, from within the REPL.  Here the magic is handling the input of numbers when in "compiling mode".
 
-Here the magic is handling the input of numbers when in "compiling mode".
+To support this we switched our `Words` array from `int` to `float64`, specifically to ensure that we could continue to support floating-point numbers.
 
      cd part4
      go build .
@@ -112,7 +120,8 @@ Here the magic is handling the input of numbers when in "compiling mode".
      5.000000
      ^D
 
-This just required adding a little state to our evaluation of words.
+See [part4/](part4/) for details.
+
 
 
 ### Part 5
@@ -133,14 +142,23 @@ This part adds `do`, `emit`, and `loop`, allowing simple loops:
 Here `do` is a NOP, and the `loop` instruction handles a pair of values
 on the stack.
 
+See [part5/](part5/) for details.
+
+
 
 ## TODO
 
-Control-Flow (i.e. "if").
+- Control-Flow (i.e. "if").
+- Test-cases.
+- Declare and document a "final" version:
+  - Allow executing a file-contents, not just a REPL.
+  - Have a few more primitives.
+
+
 
 ## BUGS
 
-loop condition-testing isn't correct:
+The handling of loops isn't correct when there should be zero-iterations:
 
 ```
      > : star 42 emit ;
