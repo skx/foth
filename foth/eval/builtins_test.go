@@ -490,8 +490,8 @@ func TestPrint(t *testing.T) {
 
 	}
 
-	var f float64
-	f = 5 / 4.0
+	f := 5 / 4.0
+
 	// float
 	e.Stack.Push(f)
 	a, _ := e.Stack.Pop()
