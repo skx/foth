@@ -6,7 +6,7 @@
     * [Part 4](#part-4) - Allow defining improved words via the REPL.
     * [Part 5](#part-5) - Allow executing loops via `do`/`loop`.
     * [Part 6](#part-6) - Allow conditional execution via `if`/`then`.
-    * [Final Revision](#final-revision)
+    * [Final Revision](#final-revision) - Idiomatic Go, test-cases, and the support for `if`/`else`/`then`.
   * [BUGS](#bugs)
   * [Github Setup](#github-setup)
 
@@ -20,29 +20,32 @@ If you're new to FORTH then the following wikipedia page is a good starting poin
 
 * [Forth](https://en.wikipedia.org/wiki/Forth_(programming_language))
 
-This repository was implemented based upon the following Hacker News comment:
+This repository was created by following the brief tutorial posted within the following Hacker News thread:
 
 * https://news.ycombinator.com/item?id=13082825
 
-The feature-set is pretty minimal:
+The end-result of this work is a simple scriptin-language which you could easily embed within your golang application, allowing users to write simple FORTH-like scripts.  We have the kind of features you would expect from a minimal system:
 
 * Reverse-Polish mathematical operations.
-* Support for floating-point numbers (anything that will fit in a float64).
+* Support for floating-point numbers (anything that will fit inside a `float64`).
 * Support for printing the top-most stack element (`.`, or `print`).
 * Support for outputting ASCII characters (`emit`).
+* Support for basic stack operatoins (`dup`, `swap`, `drop`)
 * Support for loops, via `do`/`loop`.
-* Support for conditional-execution, via `if`/`then`.
+* Support for conditional-execution, via `if`, `else`, and `then`.
 
-The code evolves through a series of steps, guided by the comment-linked, ultimately ending with a featurefull [final revision](#final-revision) which is actually somewhat useable, and which could be embedded in a host application to easily support user-scripting.
+The code evolves through a series of simple steps, guided by the comment-linked, ultimately ending with a featurefull [final revision](#final-revision) which is actually useable.
 
-While you could improve things further from this final step I'm going to stop there, because I think I've done enough for the moment.  If you did want to extend further then there _are_ some obvious things to add:
+While it would be possible to further improve the implementation from the final stage I'm going to stop there, because I think I've done enough for the moment.
+
+If you did want to extend further then there _are_ some obvious things to add:
 
 * Support for strings.
 * Support for comments.
 * Adding more of the "standard" FORTH-words.
 * Case-insensitive lookup of words.
   * e.g. "dup" should act the same way as "DUP".
-
+* Pull-requests to add additional functionality to the [final revision](#final-revision) are most welcome.
 
 
 ## Implementation Overview
