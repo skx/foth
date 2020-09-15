@@ -6,7 +6,7 @@ import (
 
 func TestAdd(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 
 	// empty stack
 	err := e.add()
@@ -37,7 +37,7 @@ func TestAdd(t *testing.T) {
 
 func TestDiv(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 
 	// empty stack
 	err := e.div()
@@ -68,7 +68,7 @@ func TestDiv(t *testing.T) {
 
 func TestDo(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 	if e.do() != nil {
 		t.Fatalf("unexpected error")
 	}
@@ -76,7 +76,7 @@ func TestDo(t *testing.T) {
 
 func TestDrop(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 	if e.drop() == nil {
 		t.Fatalf("expected error, got none")
 	}
@@ -92,7 +92,7 @@ func TestDrop(t *testing.T) {
 
 func TestDup(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 	if e.dup() == nil {
 		t.Fatalf("expected error, got none")
 	}
@@ -118,7 +118,7 @@ func TestDup(t *testing.T) {
 
 func TestEmit(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 	if e.emit() == nil {
 		t.Fatalf("expected error, got none")
 	}
@@ -131,7 +131,7 @@ func TestEmit(t *testing.T) {
 
 func TestEq(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 
 	// empty stack
 	err := e.eq()
@@ -177,7 +177,7 @@ func TestEq(t *testing.T) {
 
 func TestGt(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 
 	// empty stack
 	err := e.gt()
@@ -223,7 +223,7 @@ func TestGt(t *testing.T) {
 
 func TestGtEq(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 
 	// empty stack
 	err := e.gtEq()
@@ -269,7 +269,7 @@ func TestGtEq(t *testing.T) {
 
 func TestInvert(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 
 	// empty stack
 	err := e.invert()
@@ -302,7 +302,7 @@ func TestInvert(t *testing.T) {
 }
 func TestIff(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 	if e.iff() != nil {
 		t.Fatalf("unexpected error")
 	}
@@ -310,7 +310,7 @@ func TestIff(t *testing.T) {
 
 func TestThen(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 	if e.then() != nil {
 		t.Fatalf("unexpected error")
 	}
@@ -318,7 +318,7 @@ func TestThen(t *testing.T) {
 
 func TestWords(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 	if e.words() != nil {
 		t.Fatalf("unexpected error")
 	}
