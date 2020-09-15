@@ -1,4 +1,4 @@
-// foth - final revision, allow if/else/then, neaten-code.
+// Package eval contains our simple forth-like interpreter.
 package eval
 
 import (

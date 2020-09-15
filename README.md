@@ -33,6 +33,8 @@ The end-result of this work is a simple scriptin-language which you could easily
 * Support for basic stack operatoins (`dup`, `swap`, `drop`)
 * Support for loops, via `do`/`loop`.
 * Support for conditional-execution, via `if`, `else`, and `then`.
+* Load any files specified on the command-line
+  * If no arguments are included run the REPL
 
 The code evolves through a series of simple steps, guided by the comment-linked, ultimately ending with a featurefull [final revision](#final-revision) which is actually useable.
 
@@ -266,10 +268,8 @@ Changes here:
   * We return `error` objects where appropriate, allowing the caller to detect problems.
 * Make redefining existing words possible.
   * Note that due to our implementation previously defined words remain unchanged, even if a word is replaced/updated.
-
-TODO:
-
-* Add `else` support to our `if` & `then` primitives
+* Load any files specified on the command line.
+  * If no files are specified run the REPL.
 
 See [foth/](foth/) for the implementation.
 

@@ -1,3 +1,4 @@
+// Package stack allows a stack of float64 to be maintained.
 package stack
 
 import (
