@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"foth/stack"
 )
 
 // Word is the structure for a single word.
@@ -34,7 +36,7 @@ type Word struct {
 type Eval struct {
 
 	// Stack holds our operands.
-	Stack Stack
+	Stack stack.Stack
 
 	// Dictionary entries
 	Dictionary []Word
