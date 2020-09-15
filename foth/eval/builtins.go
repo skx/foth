@@ -5,7 +5,7 @@
 // We've added `emit` here, to output the value at the top of the stack
 // as an ASCII character, as well as "do" (nop) and "loop".
 
-package main
+package eval
 
 import (
 	"fmt"

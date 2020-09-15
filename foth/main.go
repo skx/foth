@@ -10,10 +10,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"foth/eval"
 )
 
 // If the given file exists, read the contents, and evaluate it
-func doInit(eval *Eval, path string) {
+func doInit(eval *eval.Eval, path string) {
 
 	handle, err := os.Open(path)
 	if err != nil {
@@ -47,7 +49,7 @@ func doInit(eval *Eval, path string) {
 func main() {
 
 	reader := bufio.NewReader(os.Stdin)
-	forth := NewEval()
+	forth := eval.New()
 
 	// Load the init-file if it is present.
 	doInit(forth, "foth.4th")

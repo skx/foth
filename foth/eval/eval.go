@@ -1,5 +1,5 @@
 // part6 - allow if, and implement more built-ins to make that useful.
-package main
+package eval
 
 import (
 	"fmt"
@@ -57,8 +57,8 @@ type Eval struct {
 	ifOffset int
 }
 
-// NewEval returns a simple evaluator, which will allow executing forth-like words.
-func NewEval() *Eval {
+// New returns a simple evaluator, which will allow executing forth-like words.
+func New() *Eval {
 
 	// Empty structure
 	e := &Eval{}

@@ -1,4 +1,4 @@
-package main
+package eval
 
 import (
 	"os"
@@ -8,7 +8,7 @@ import (
 
 func TestBasic(t *testing.T) {
 
-	e := NewEval()
+	e := New()
 	out := e.Eval([]string{"", ".", " "})
 
 	if out == nil {
@@ -20,7 +20,7 @@ func TestDumpWords(t *testing.T) {
 
 	// dummy test
 	os.Setenv("DEBUG", "1")
-	e := NewEval()
+	e := New()
 
 	if e.debug != true {
 		t.Fatalf("putenv didn't enable debugging")
@@ -43,7 +43,7 @@ func TestDumpWords(t *testing.T) {
 func TestEvalWord(t *testing.T) {
 
 	// dummy test
-	e := NewEval()
+	e := New()
 
 	// test definitions
 	tests := []string{": star 42 emit ;",
