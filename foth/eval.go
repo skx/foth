@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Word is the structure for a single word
+// Word is the structure for a single word.
 type Word struct {
 	// Name is the name of the function "+", "print", etc.
 	Name string
@@ -99,7 +99,7 @@ func NewEval() *Eval {
 // Eval processes a list of tokens.
 //
 // This is invoked by our repl with a line of input at the time.
-func (e *Eval) Eval(args []string) {
+func (e *Eval) Eval(args []string) error {
 
 	for _, tok := range args {
 
@@ -195,8 +195,7 @@ func (e *Eval) Eval(args []string) {
 				// Convert to float
 				val, err := strconv.ParseFloat(tok, 64)
 				if err != nil {
-					fmt.Printf("%s: %s\n", tok, err.Error())
-					return
+					return fmt.Errorf("failed to convert %s to number %s", tok, err.Error())
 				}
 				e.tmp.Words = append(e.tmp.Words, val)
 			}
@@ -208,7 +207,10 @@ func (e *Eval) Eval(args []string) {
 		handled := false
 		for index, word := range e.Dictionary {
 			if tok == word.Name {
-				e.evalWord(index)
+				err := e.evalWord(index)
+				if err != nil {
+					return err
+				}
 				handled = true
 			}
 		}
@@ -218,13 +220,14 @@ func (e *Eval) Eval(args []string) {
 		if !handled {
 			i, err := strconv.ParseFloat(tok, 64)
 			if err != nil {
-				fmt.Printf("%s: %s\n", tok, err.Error())
-				return
+				return fmt.Errorf("failed to convert %s to number %s", tok, err.Error())
 			}
 
 			e.Stack.Push(i)
 		}
 	}
+
+	return nil
 }
 
 // evalWord evaluates a word, by index from the dictionary
@@ -254,8 +257,8 @@ func (e *Eval) evalWord(index int) error {
 	// Is this implemented in golang?  If so just invoke the function
 	// and we're done.
 	if word.Function != nil {
-		word.Function()
-		return nil
+		err := word.Function()
+		return err
 	}
 
 	//
