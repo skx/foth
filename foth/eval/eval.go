@@ -115,93 +115,13 @@ func (e *Eval) Eval(args []string) error {
 		// Are we in compiling mode?
 		if e.compiling {
 
-			// If we don't have a name
-			if e.tmp.Name == "" {
-
-				// is the name used?
-				idx := e.findWord(tok)
-				if idx != -1 {
-
-					// The name is used, so we need to remove it
-					e.Dictionary[idx].Name = ""
-				}
-
-				// save the name
-				e.tmp.Name = tok
-
-				continue
+			// If so compile the token
+			err := e.compileToken(tok)
+			if err != nil {
+				return err
 			}
 
-			// End of a definition?
-			if tok == ";" {
-				e.Dictionary = append(e.Dictionary, e.tmp)
-
-				// Show what we compiled each new definition
-				// to, when running in debug-mode
-				if e.debug {
-					e.dumpWords()
-				}
-
-				e.tmp.Name = ""
-				e.tmp.Words = []float64{}
-				e.compiling = false
-
-				continue
-
-			}
-
-			// OK we have a name, so lookup the word definition
-			// for it.
-			idx := e.findWord(tok)
-			if idx >= 0 {
-				// Found it
-				e.tmp.Words = append(e.tmp.Words, float64(idx))
-
-				// If the word was a "DO"
-				if tok == "do" {
-					e.doOpen = len(e.tmp.Words) - 1
-				}
-
-				// if the word was a "LOOP"
-				if tok == "loop" {
-
-					// offset of do must be present
-					e.tmp.Words = append(e.tmp.Words, -2)
-					e.tmp.Words = append(e.tmp.Words, float64(e.doOpen))
-				}
-
-				// If the word was a "if"
-				if tok == "if" {
-					// we add the conditional-jump opcode
-					e.tmp.Words = append(e.tmp.Words, -3)
-					// placeholder jump-offset
-					e.tmp.Words = append(e.tmp.Words, 99)
-
-					// save the address of our stub,
-					// so we can back-patch
-					e.ifOffset = len(e.tmp.Words)
-				}
-
-				if tok == "then" {
-					// back - patch the jump offset to the position of this word
-					e.tmp.Words[e.ifOffset-1] = float64(len(e.tmp.Words) - 1)
-				}
-
-			} else {
-
-				// OK we assume the user entered a number
-				// so we save a magic "-1" flag in our
-				// definition, and then the number itself
-				e.tmp.Words = append(e.tmp.Words, -1)
-
-				// Convert to float
-				val, err := strconv.ParseFloat(tok, 64)
-				if err != nil {
-					return fmt.Errorf("failed to convert %s to number %s", tok, err.Error())
-				}
-				e.tmp.Words = append(e.tmp.Words, val)
-			}
-
+			// And loop around.
 			continue
 		}
 
@@ -228,6 +148,105 @@ func (e *Eval) Eval(args []string) error {
 			e.Stack.Push(i)
 		}
 	}
+
+	return nil
+}
+
+// compileToken is called with a new token, when we're in compiling-mode.
+func (e *Eval) compileToken(tok string) error {
+
+	// If we don't have a name
+	if e.tmp.Name == "" {
+
+		// is the name used?
+		idx := e.findWord(tok)
+		if idx != -1 {
+
+			// The name is used, so we need to remove it
+			e.Dictionary[idx].Name = ""
+		}
+
+		// save the name
+		e.tmp.Name = tok
+
+		return nil
+	}
+
+	// End of a definition?
+	if tok == ";" {
+
+		// Save the word to our dictionary
+		e.Dictionary = append(e.Dictionary, e.tmp)
+
+		// Show what we compiled each new definition
+		// to, when running in debug-mode
+		if e.debug {
+			e.dumpWords()
+		}
+
+		// reset for the next definition
+		e.tmp.Name = ""
+		e.tmp.Words = []float64{}
+		e.compiling = false
+		return nil
+	}
+
+	// Is the user adding an existing word?
+	idx := e.findWord(tok)
+	if idx >= 0 {
+
+		// Found it
+		e.tmp.Words = append(e.tmp.Words, float64(idx))
+
+		//
+		// Now some special cases.
+		//
+		// Horrid
+		//
+		// If the word was a "DO"
+		if tok == "do" {
+			e.doOpen = len(e.tmp.Words) - 1
+		}
+
+		// if the word was a "LOOP"
+		if tok == "loop" {
+
+			// offset of do must be present
+			e.tmp.Words = append(e.tmp.Words, -2)
+			e.tmp.Words = append(e.tmp.Words, float64(e.doOpen))
+		}
+
+		// If the word was a "if"
+		if tok == "if" {
+			// we add the conditional-jump opcode
+			e.tmp.Words = append(e.tmp.Words, -3)
+			// placeholder jump-offset
+			e.tmp.Words = append(e.tmp.Words, 99)
+
+			// save the address of our stub,
+			// so we can back-patch
+			e.ifOffset = len(e.tmp.Words)
+		}
+
+		if tok == "then" {
+			// back - patch the jump offset to the position of this word
+			e.tmp.Words[e.ifOffset-1] = float64(len(e.tmp.Words) - 1)
+		}
+
+		return nil
+	}
+
+	// At this point we assume the user entered a number
+	// so we save a magic "-1" flag in our
+	// definition, and then the number itself
+	e.tmp.Words = append(e.tmp.Words, -1)
+
+	// Convert to float
+	val, err := strconv.ParseFloat(tok, 64)
+	if err != nil {
+		return fmt.Errorf("failed to convert %s to number %s", tok, err.Error())
+	}
+	e.tmp.Words = append(e.tmp.Words, val)
 
 	return nil
 }
