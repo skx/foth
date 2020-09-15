@@ -49,3 +49,14 @@
 #
 : bootup 87 emit 101 emit 108 emit 99 emit 111 emit 109 emit 101 emit 32 emit 116 emit 111 emit 32 emit 102 emit 111 emit 116 emit 104 emit 33 emit 10 emit ;
 bootup
+
+
+# output "Hot"
+: hot 72 emit 111 emit 116 emit 10 emit ;
+
+# Output "Cod"
+: cold 67 emit 111 emit 108 emit 100 emit 10 emit ;
+
+: test_hot  0 > if hot then ;
+: test_cold  0 <= if cold then ;
+: temp dup test_hot test_cold ;
