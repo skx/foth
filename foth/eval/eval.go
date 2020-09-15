@@ -88,12 +88,12 @@ func New() *Eval {
 		Word{Name: ">", Function: e.gt},
 		Word{Name: ">=", Function: e.gtEq},
 		Word{Name: "do", Function: e.do},
-		Word{Name: "else", Function: e.elsee},
-		Word{Name: "if", Function: e.iff},
-		Word{Name: "invert", Function: e.invert},
 		Word{Name: "drop", Function: e.drop},
 		Word{Name: "dup", Function: e.dup},
+		Word{Name: "else", Function: e.elsee},
 		Word{Name: "emit", Function: e.emit},
+		Word{Name: "if", Function: e.iff},
+		Word{Name: "invert", Function: e.invert},
 		Word{Name: "loop", Function: e.loop},
 		Word{Name: "print", Function: e.print},
 		Word{Name: "swap", Function: e.swap},
@@ -134,6 +134,7 @@ func (e *Eval) Eval(args []string) error {
 		// Did we handle this as a dictionary item?
 		handled := false
 		for index, word := range e.Dictionary {
+
 			if tok == word.Name {
 				handled = true
 				err := e.evalWord(index)
@@ -201,10 +202,8 @@ func (e *Eval) compileToken(tok string) error {
 	idx := e.findWord(tok)
 	if idx >= 0 {
 
-		// Found the word, add to the end.  Except for special ones
-		if tok != "do" && tok != "loop" && tok != "if" && tok != "else" && tok != "then" {
-			e.tmp.Words = append(e.tmp.Words, float64(idx))
-		}
+		// Found the word, add to the end.
+		e.tmp.Words = append(e.tmp.Words, float64(idx))
 
 		//
 		// Now some special cases.
@@ -341,6 +340,9 @@ func (e *Eval) evalWord(index int) error {
 	// Is this implemented in golang?  If so just invoke the function
 	// and we're done.
 	if word.Function != nil {
+		if word.Name == "if" || word.Name == "else" || word.Name == "then" {
+			return nil
+		}
 
 		if e.debug {
 			fmt.Printf(" calling %s\n", word.Name)
