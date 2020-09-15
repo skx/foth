@@ -148,11 +148,14 @@ See [part5/](part5/) for details.
 
 ## TODO
 
-- Control-Flow (i.e. "if").
+- Add "==", "<", "<=", ">", ">=" operations.
+  - Push 1 or 0 on the stack depending on the result.
+- Implement if-offset to allow conditionals
+  - Using the previous operators.
 - Test-cases.
 - Declare and document a "final" version:
-  - Allow executing a file-contents, not just a REPL.
-  - Have a few more primitives.
+  - Load any primitives from "`./foth.4th`", if present.
+  - Allow executing file-contents, not just a REPL.
 
 
 
