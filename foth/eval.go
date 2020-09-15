@@ -17,7 +17,7 @@ type Word struct {
 	//
 	// If this is nil then instead we interpret the known-codes
 	// from previously defined words.
-	Function func()
+	Function func() error
 
 	// Words holds the words we execute if the function-pointer
 	// is empty.
@@ -246,7 +246,7 @@ func (e *Eval) Eval(args []string) {
 //    "-3" is a conditional-jump, which will change our IP if
 //         the topmost item on the stack is "0".
 //
-func (e *Eval) evalWord(index int) {
+func (e *Eval) evalWord(index int) error {
 
 	// Lookup the word in our dictionary.
 	word := e.Dictionary[index]
@@ -255,7 +255,7 @@ func (e *Eval) evalWord(index int) {
 	// and we're done.
 	if word.Function != nil {
 		word.Function()
-		return
+		return nil
 	}
 
 	//
@@ -295,8 +295,14 @@ func (e *Eval) evalWord(index int) {
 		} else if jump {
 			// If the two top-most entries
 			// are not equal, then jump
-			cur := e.Stack.Pop()
-			max := e.Stack.Pop()
+			cur, ee := e.Stack.Pop()
+			if ee != nil {
+				return ee
+			}
+			max, eee := e.Stack.Pop()
+			if eee != nil {
+				return eee
+			}
 
 			if max > cur {
 				// put them back
@@ -316,7 +322,10 @@ func (e *Eval) evalWord(index int) {
 			// Jump only if 0 is on the top of the stack.
 			//
 			// i.e. This is an "if" test.
-			val := e.Stack.Pop()
+			val, err := e.Stack.Pop()
+			if err != nil {
+				return err
+			}
 			if val == 0 {
 				// change opcode
 				ip = int(opcode)
@@ -343,6 +352,8 @@ func (e *Eval) evalWord(index int) {
 		// next instruction
 		ip++
 	}
+
+	return nil
 }
 
 // findWords returns the index in our dictionary of the entry for the

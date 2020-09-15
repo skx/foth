@@ -13,124 +13,233 @@ import (
 	"strings"
 )
 
-func (e *Eval) add() {
-	a := e.Stack.Pop()
-	b := e.Stack.Pop()
+func (e *Eval) add() error {
+	var a, b float64
+	var err error
+
+	a, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	b, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 	e.Stack.Push(a + b)
+	return nil
 }
 
-func (e *Eval) div() {
-	a := e.Stack.Pop()
-	b := e.Stack.Pop()
+func (e *Eval) div() error {
+	var a, b float64
+	var err error
+
+	a, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	b, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+
 	e.Stack.Push(b / a)
+	return nil
 }
 
-func (e *Eval) do() {
+func (e *Eval) do() error {
 	// nop
+	return nil
 }
 
-func (e *Eval) drop() {
-	e.Stack.Pop()
+func (e *Eval) drop() error {
+	_, err := e.Stack.Pop()
+	return err
 }
 
-func (e *Eval) dup() {
-	a := e.Stack.Pop()
+func (e *Eval) dup() error {
+	a, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 	e.Stack.Push(a)
 	e.Stack.Push(a)
+
+	return nil
 }
 
-func (e *Eval) emit() {
-	a := e.Stack.Pop()
+func (e *Eval) emit() error {
+	a, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 	fmt.Printf("%c", rune(a))
+	return nil
 }
 
-func (e *Eval) eq() {
-	a := e.Stack.Pop()
-	b := e.Stack.Pop()
+func (e *Eval) eq() error {
+	var a, b float64
+	var err error
+	a, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	b, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 	if a == b {
 		e.Stack.Push(1)
 	} else {
 		e.Stack.Push(0)
 	}
+	return nil
 }
 
-func (e *Eval) gt() {
-	b := e.Stack.Pop()
-	a := e.Stack.Pop()
+func (e *Eval) gt() error {
+	var a, b float64
+	var err error
+	b, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	a, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 	if a > b {
 		e.Stack.Push(1)
 	} else {
 		e.Stack.Push(0)
 	}
+	return nil
 }
 
-func (e *Eval) gt_eq() {
-	b := e.Stack.Pop()
-	a := e.Stack.Pop()
+func (e *Eval) gt_eq() error {
+	var a, b float64
+	var err error
+	b, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	a, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 	if a >= b {
 		e.Stack.Push(1)
 	} else {
 		e.Stack.Push(0)
 	}
+	return nil
 }
 
-func (e *Eval) iff() {
+func (e *Eval) iff() error {
 	// nop
+	return nil
 }
 
-func (e *Eval) invert() {
-	v := e.Stack.Pop()
+func (e *Eval) invert() error {
+	v, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 	if v == 0 {
 		e.Stack.Push(1)
 	} else {
 		e.Stack.Push(0)
 	}
+
+	return nil
 }
 
-func (e *Eval) loop() {
-	cur := e.Stack.Pop()
-	max := e.Stack.Pop()
+func (e *Eval) loop() error {
+	var cur, max float64
+	var err error
+	cur, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	max, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 
 	cur += 1
 
 	e.Stack.Push(max)
 	e.Stack.Push(cur)
+
+	return nil
 }
 
-func (e *Eval) lt() {
-	b := e.Stack.Pop()
-	a := e.Stack.Pop()
+func (e *Eval) lt() error {
+	var a, b float64
+	var err error
+	b, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	a, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+
 	if a < b {
 		e.Stack.Push(1)
 	} else {
 		e.Stack.Push(0)
 	}
+
+	return nil
 }
 
-func (e *Eval) lt_eq() {
-	b := e.Stack.Pop()
-	a := e.Stack.Pop()
+func (e *Eval) lt_eq() error {
+	var a, b float64
+	var err error
+	b, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	a, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+
 	if a <= b {
 		e.Stack.Push(1)
 	} else {
 		e.Stack.Push(0)
 	}
+
+	return nil
 }
 
-func (e *Eval) mul() {
-	a := e.Stack.Pop()
-	b := e.Stack.Pop()
+func (e *Eval) mul() error {
+	var a, b float64
+	var err error
+	b, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	a, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 	e.Stack.Push(a * b)
+	return nil
 }
 
-func (e *Eval) print() {
-	a := e.Stack.Pop()
+func (e *Eval) print() error {
+	a, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 
 	// If the value on the top of the stack is an integer
 	// then show it as one - i.e. without any ".00000".
 	if float64(int(a)) == a {
 		fmt.Printf("%d\n", int(a))
-		return
+		return nil
 	}
 
 	// OK we have a floating-point result.  Show it, but
@@ -144,34 +253,55 @@ func (e *Eval) print() {
 		output = strings.TrimSuffix(output, "0")
 	}
 	fmt.Printf("%s\n", output)
-
+	return nil
 }
 
 // startDefinition moves us into compiling-mode
 //
 // Note the interpreter handles removing this when it sees ";"
-func (e *Eval) startDefinition() {
+func (e *Eval) startDefinition() error {
 	e.compiling = true
+	return nil
 }
 
-func (e *Eval) sub() {
-	a := e.Stack.Pop()
-	b := e.Stack.Pop()
+func (e *Eval) sub() error {
+	var a, b float64
+	var err error
+	b, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	a, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 	e.Stack.Push(b - a)
+	return nil
 }
 
-func (e *Eval) swap() {
-	a := e.Stack.Pop()
-	b := e.Stack.Pop()
+func (e *Eval) swap() error {
+	var a, b float64
+	var err error
+	b, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	a, err = e.Stack.Pop()
+	if err != nil {
+		return err
+	}
 	e.Stack.Push(a)
 	e.Stack.Push(b)
+
+	return nil
 }
 
-func (e *Eval) then() {
+func (e *Eval) then() error {
 	// nop
+	return nil
 }
 
-func (e *Eval) words() {
+func (e *Eval) words() error {
 	known := []string{}
 
 	for _, entry := range e.Dictionary {
@@ -180,4 +310,6 @@ func (e *Eval) words() {
 
 	sort.Strings(known)
 	fmt.Printf("%s\n", strings.Join(known, " "))
+
+	return nil
 }

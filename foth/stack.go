@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 )
 
 // Stack holds our numbers.
@@ -19,15 +18,14 @@ func (s *Stack) Push(x float64) {
 }
 
 // Pop removes and returns the top element of stack.
-func (s *Stack) Pop() float64 {
+func (s *Stack) Pop() (float64, error) {
 	if s.IsEmpty() {
-		fmt.Printf("stack underflow\n")
-		os.Exit(1)
+		return 0, fmt.Errorf("stack underflow")
 	}
 
 	i := len(*s) - 1
 	x := (*s)[i]
 	*s = (*s)[:i]
 
-	return x
+	return x, nil
 }
