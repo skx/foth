@@ -1,4 +1,5 @@
-// part6 driver
+// foth - final revision, allow if/else/then, neaten-code, and run files
+//        specified on the command-line.  If none run the REPL.
 //
 // Loads "foth.4th" from cwd, if present, and evaluates it before the REPL
 // is launched - otherwise the same as previous versions.
@@ -15,11 +16,11 @@ import (
 )
 
 // If the given file exists, read the contents, and evaluate it
-func doInit(eval *eval.Eval, path string) {
+func doInit(eval *eval.Eval, path string) error {
 
 	handle, err := os.Open(path)
 	if err != nil {
-		return
+		return err
 	}
 
 	reader := bufio.NewReader(handle)
@@ -43,7 +44,16 @@ func doInit(eval *eval.Eval, path string) {
 		line, err = reader.ReadString(byte('\n'))
 	}
 
-	handle.Close()
+	if err != nil {
+		return err
+	}
+
+	err = handle.Close()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func main() {
@@ -52,8 +62,21 @@ func main() {
 	forth := eval.New()
 
 	// Load the init-file if it is present.
+	//
+	// i.e. Run the file, but ignore errors.
 	doInit(forth, "foth.4th")
 
+	// If we got any arguments treat them as files to lead
+	for _, file := range os.Args[1:] {
+		err := doInit(forth, file)
+		if err != nil {
+			fmt.Printf("error running %s: %s\n", file, err.Error())
+			return
+		}
+		return
+	}
+
+	// No arguments, just run the REPL
 	for {
 		fmt.Printf("> ")
 

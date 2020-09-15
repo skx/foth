@@ -1,4 +1,4 @@
-// part6 - allow if, and implement more built-ins to make that useful.
+// foth - final revision, allow if/else/then, neaten-code.
 package eval
 
 import (
@@ -53,8 +53,13 @@ type Eval struct {
 	// open of the last do
 	doOpen int
 
-	// offset of the argument to any IF
-	ifOffset int
+	// When we generate IF-statements we have to patch one or two
+	// offsets, depending on whether there is an ELSE branch present
+	// or not.
+	//
+	// Here we keep track of them
+	ifOffset1 int
+	ifOffset2 int
 }
 
 // New returns a simple evaluator, which will allow executing forth-like words.
@@ -83,6 +88,7 @@ func New() *Eval {
 		Word{Name: ">", Function: e.gt},
 		Word{Name: ">=", Function: e.gtEq},
 		Word{Name: "do", Function: e.do},
+		Word{Name: "else", Function: e.elsee},
 		Word{Name: "if", Function: e.iff},
 		Word{Name: "invert", Function: e.invert},
 		Word{Name: "drop", Function: e.drop},
@@ -129,11 +135,11 @@ func (e *Eval) Eval(args []string) error {
 		handled := false
 		for index, word := range e.Dictionary {
 			if tok == word.Name {
+				handled = true
 				err := e.evalWord(index)
 				if err != nil {
 					return err
 				}
-				handled = true
 			}
 		}
 
@@ -216,21 +222,74 @@ func (e *Eval) compileToken(tok string) error {
 			e.tmp.Words = append(e.tmp.Words, float64(e.doOpen))
 		}
 
-		// If the word was a "if"
+		//
+		// Conditional support is a bit nasty.
+		//
+		// Basically we expect to allow someone to writ
+		// something like:
+		//
+		//  : foo 0 < if neg else pos then
+		//
+		// That translates to:
+		//
+		//  if foo < 0 {
+		//    neg
+		//  } else {
+		//    pos
+		// }
+		//
+		// We want to convert that to:
+		//
+		//  COND
+		//  IF
+		//     CONDJUMP xx
+		//     NEG CODE
+		//     JMP end
+		//   ELSE
+		//  xx:
+		//     POS CODE
+		//   THEN
+		//  end:
+		//
+		// In short we have to insert a conditional-jump, and
+		// an unconditional one.
+		//
+		// We then use back-patching to fixup the offsets.
+		//
 		if tok == "if" {
+			// reset both possible places to patch
+			e.ifOffset1 = 0
+			e.ifOffset2 = 0
+
 			// we add the conditional-jump opcode
 			e.tmp.Words = append(e.tmp.Words, -3)
 			// placeholder jump-offset
 			e.tmp.Words = append(e.tmp.Words, 99)
 
-			// save the address of our stub,
-			// so we can back-patch
-			e.ifOffset = len(e.tmp.Words)
+			// The offset of the last instruction is
+			// the 99-byte we just added as a placeholder
+			// record that.
+			e.ifOffset1 = len(e.tmp.Words)
+		}
+
+		if tok == "else" {
+			e.tmp.Words[e.ifOffset1-1] = float64(len(e.tmp.Words) + 2)
+
+			// before we compile the end we have to
+			// add a jump to after the THEN
+			e.tmp.Words = append(e.tmp.Words, -4)
+			e.tmp.Words = append(e.tmp.Words, 999)
+
+			e.ifOffset2 = len(e.tmp.Words)
 		}
 
 		if tok == "then" {
 			// back - patch the jump offset to the position of this word
-			e.tmp.Words[e.ifOffset-1] = float64(len(e.tmp.Words) - 1)
+			if e.ifOffset2 > 0 {
+				e.tmp.Words[e.ifOffset2-1] = float64(len(e.tmp.Words) - 1)
+			} else {
+				e.tmp.Words[e.ifOffset1-1] = float64(len(e.tmp.Words) - 1)
+			}
 		}
 
 		return nil
@@ -265,10 +324,12 @@ func (e *Eval) compileToken(tok string) error {
 //
 //    "-1" means the next value is a number
 //
-//    "-2" is an unconditional jump, which will change our IP.
+//    "-2" is an loop jump, which will change our IP.
 //
 //    "-3" is a conditional-jump, which will change our IP if
 //         the topmost item on the stack is "0".
+//
+//    "-4" is an unconditional jump, which will change our IP
 //
 func (e *Eval) evalWord(index int) error {
 
@@ -278,8 +339,16 @@ func (e *Eval) evalWord(index int) error {
 	// Is this implemented in golang?  If so just invoke the function
 	// and we're done.
 	if word.Function != nil {
+
+		if e.debug {
+			fmt.Printf(" calling %s\n", word.Name)
+		}
 		err := word.Function()
 		return err
+	}
+
+	if e.debug {
+		fmt.Printf(" calling dynamic stuff\n")
 	}
 
 	//
@@ -300,6 +369,9 @@ func (e *Eval) evalWord(index int) error {
 	// jumping?
 	jump := false
 
+	// Loop jump
+	loopJump := false
+
 	// jumping if the stack has a false-value?
 	condJump := false
 
@@ -313,10 +385,14 @@ func (e *Eval) evalWord(index int) error {
 
 		// adding a number?
 		if addNum {
+			if e.debug {
+				fmt.Printf(" storing %f on stack\n", opcode)
+			}
+
 			// add to stack
 			e.Stack.Push(opcode)
 			addNum = false
-		} else if jump {
+		} else if loopJump {
 			// If the two top-most entries
 			// are not equal, then jump
 			cur, ee := e.Stack.Pop()
@@ -341,7 +417,7 @@ func (e *Eval) evalWord(index int) error {
 				ip--
 			}
 
-			jump = false
+			loopJump = false
 		} else if condJump {
 			// Jump only if 0 is on the top of the stack.
 			//
@@ -350,14 +426,30 @@ func (e *Eval) evalWord(index int) error {
 			if err != nil {
 				return err
 			}
+
 			if val == 0 {
+				if e.debug {
+
+					fmt.Printf(" popped %f from stack - jumping to %f\n", val, opcode)
+				}
 				// change opcode
 				ip = int(opcode)
 				// decrement as it'll get bumped at
 				// the foot of the loop
 				ip--
+			} else {
+				if e.debug {
+					fmt.Printf(" popped %f from stack - not making conditional jump\n", val)
+				}
 			}
 			condJump = false
+		} else if jump {
+			// change opcode
+			ip = int(opcode)
+			// decrement as it'll get bumped at
+			// the foot of the loop
+			ip--
+			jump = false
 		} else {
 
 			// if we see -1 we're adding a number
@@ -365,11 +457,16 @@ func (e *Eval) evalWord(index int) error {
 			case -1:
 				addNum = true
 			case -2:
-				jump = true
+				loopJump = true
 			case -3:
 				condJump = true
+			case -4:
+				jump = true
 			default:
-				e.evalWord(int(opcode))
+				err := e.evalWord(int(opcode))
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -402,18 +499,21 @@ func (e *Eval) dumpWords() {
 		v := e.tmp.Words[int(off)]
 
 		if v == -1 {
-			codes = append(codes, fmt.Sprintf("%f", e.tmp.Words[off+1]))
+			codes = append(codes, fmt.Sprintf("%d: store %f", off, e.tmp.Words[off+1]))
 			off++
 		} else if v == -2 {
-			codes = append(codes, fmt.Sprintf("[jmp %f]", e.tmp.Words[off+1]))
+			codes = append(codes, fmt.Sprintf("%d: [loop-jmp %f]", off, e.tmp.Words[off+1]))
 			off++
 		} else if v == -3 {
-			codes = append(codes, fmt.Sprintf("[cond-jmp %f]", e.tmp.Words[off+1]))
+			codes = append(codes, fmt.Sprintf("%d: [cond-jmp %f]", off, e.tmp.Words[off+1]))
+			off++
+		} else if v == -4 {
+			codes = append(codes, fmt.Sprintf("%d: [jmp %f]", off, e.tmp.Words[off+1]))
 			off++
 		} else {
-			codes = append(codes, e.Dictionary[int(v)].Name)
+			codes = append(codes, fmt.Sprintf("%d: %s", off, e.Dictionary[int(v)].Name))
 		}
 		off++
 	}
-	fmt.Printf("Compiled word '%s' -> %s\n", e.tmp.Name, strings.Join(codes, " "))
+	fmt.Printf("Compiled word '%s'\n %s\n", e.tmp.Name, strings.Join(codes, "\n "))
 }

@@ -67,6 +67,11 @@ func (e *Eval) dup() error {
 	return nil
 }
 
+func (e *Eval) elsee() error {
+	// nop
+	return nil
+}
+
 func (e *Eval) emit() error {
 	a, err := e.Stack.Pop()
 	if err != nil {

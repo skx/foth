@@ -78,5 +78,50 @@ func TestFloatFail(t *testing.T) {
 			t.Fatalf("got an error, but the wrong one: %s", err.Error())
 		}
 	}
+}
+
+func TestIfThenElse(t *testing.T) {
+
+	type Test struct {
+		input  string
+		result float64
+	}
+
+	tests := []Test{
+		//		Test{input: "3 3 = if 1 then", result: 1},
+		Test{input: ": f 3 3 = if 1 then ; f", result: 1},
+
+		//		Test{input: "3 3 = invert if 1 else 2 then", result: 2},
+		Test{input: ": f 3 3 = invert if 1 else 2 then ; f", result: 2},
+
+		//		Test{input: "3 31 = if 0 else 3 then", result: 3},
+		Test{input: ": f 3 31 = if 0 else 3 then ; f ", result: 3},
+
+		//		Test{input: "3 31 = if 1 else 12 then", result: 12},
+		Test{input: ": f 3 31 = if 1 else 12 then ; f", result: 12},
+
+		//		Test{input: "3 21 = invert if 221 else 112 then", result: 221},
+		Test{input: ": ff 3 21 = invert if 221 else 112 then ; ff ", result: 221},
+	}
+
+	for _, test := range tests {
+
+		e := New()
+		err := e.Eval(strings.Split(test.input, " "))
+		if err != nil {
+			t.Fatalf("unexpected error processing '%s': %s", test.input, err.Error())
+		}
+
+		ret, err2 := e.Stack.Pop()
+		if err2 != nil {
+			t.Fatalf("failed to get stack value")
+		}
+		if !e.Stack.IsEmpty() {
+			t.Fatalf("%s: expected stack to be empty", test.input)
+		}
+		if ret != test.result {
+			t.Fatalf("%s: %f got %f", test.input, test.result, ret)
+		}
+	}
 
 }
