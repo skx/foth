@@ -47,8 +47,7 @@ func (e *Eval) div() error {
 }
 
 func (e *Eval) do() error {
-	// nop
-	return nil
+	return fmt.Errorf("'do' can only be used inside a word-definition")
 }
 
 func (e *Eval) drop() error {
@@ -68,8 +67,7 @@ func (e *Eval) dup() error {
 }
 
 func (e *Eval) elsee() error {
-	// nop
-	return nil
+	return fmt.Errorf("'else' can only be used inside a word-definition")
 }
 
 func (e *Eval) emit() error {
@@ -139,7 +137,7 @@ func (e *Eval) gtEq() error {
 }
 
 func (e *Eval) iff() error {
-	// nop
+	return fmt.Errorf("if can only be used inside a word-definition")
 	return nil
 }
 
@@ -303,8 +301,7 @@ func (e *Eval) swap() error {
 }
 
 func (e *Eval) then() error {
-	// nop
-	return nil
+	return fmt.Errorf("'then' can only be used inside a word-definition")
 }
 
 func (e *Eval) words() error {

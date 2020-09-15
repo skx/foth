@@ -201,8 +201,10 @@ func (e *Eval) compileToken(tok string) error {
 	idx := e.findWord(tok)
 	if idx >= 0 {
 
-		// Found it
-		e.tmp.Words = append(e.tmp.Words, float64(idx))
+		// Found the word, add to the end.  Except for special ones
+		if tok != "do" && tok != "loop" && tok != "if" && tok != "else" && tok != "then" {
+			e.tmp.Words = append(e.tmp.Words, float64(idx))
+		}
 
 		//
 		// Now some special cases.
@@ -286,7 +288,7 @@ func (e *Eval) compileToken(tok string) error {
 		if tok == "then" {
 			// back - patch the jump offset to the position of this word
 			if e.ifOffset2 > 0 {
-				e.tmp.Words[e.ifOffset2-1] = float64(len(e.tmp.Words) - 1)
+				e.tmp.Words[e.ifOffset2-1] = float64(len(e.tmp.Words))
 			} else {
 				e.tmp.Words[e.ifOffset1-1] = float64(len(e.tmp.Words) - 1)
 			}
