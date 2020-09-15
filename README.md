@@ -11,20 +11,33 @@
 
 # foth
 
-A simple implementation of a FORTH-like, hence _foth_, language, as
-described in the following Hacker News comment:
+A simple implementation of a FORTH-like language, hence _foth_ which is
+close to _forth_.
+
+This repository was implemented based upon the following Hacker News comment:
 
 * https://news.ycombinator.com/item?id=13082825
+
+The feature-set is pretty minimal:
+
+* Reverse-Polish mathematical operations.
+* Support for floating-point numbers (anything that will fit in a float64).
+* Support for printing the top-most stack element (`.`, or `print`).
+* Support for outputting ASCII characters (`emit`).
+* Support for loops.
 
 
 ## Implementation Overview
 
 Each subdirectory gets a bit further down the comment-chain.
 
-There is a common "stack.go" which contains a simple `float64` stack,
-there is no support for strings or similar.
+In terms of implementation two files are identical in each example:
 
-Built-ins are documented in `builtins.go` in each directory.
+* `stack.go` contains a simple `float64` stack.
+* `main.go` contains a simple driver.
+
+Each example has a slightly improving set of built-in functions implemented
+in golang, which you can see in `builtins.go`.
 
 
 ### Part 1
