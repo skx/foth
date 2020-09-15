@@ -390,7 +390,7 @@ func (e *Eval) dumpWords() {
 			codes = append(codes, fmt.Sprintf("[cond-jmp %f]", e.tmp.Words[off+1]))
 			off++
 		} else {
-			codes = append(codes, fmt.Sprintf("%s", e.Dictionary[int(v)].Name))
+			codes = append(codes, e.Dictionary[int(v)].Name)
 		}
 		off++
 	}
