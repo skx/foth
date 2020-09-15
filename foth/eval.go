@@ -119,8 +119,9 @@ func (e *Eval) Eval(args []string) {
 				// is the name used?
 				idx := e.findWord(tok)
 				if idx != -1 {
-					fmt.Printf("word %s already defined\n", tok)
-					os.Exit(1)
+
+					// The name is used, so we need to remove it
+					e.Dictionary[idx].Name = ""
 				}
 
 				// save the name
