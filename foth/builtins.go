@@ -114,7 +114,7 @@ func (e *Eval) gt() error {
 	return nil
 }
 
-func (e *Eval) gt_eq() error {
+func (e *Eval) gtEq() error {
 	var a, b float64
 	var err error
 	b, err = e.Stack.Pop()
@@ -164,7 +164,7 @@ func (e *Eval) loop() error {
 		return err
 	}
 
-	cur += 1
+	cur++
 
 	e.Stack.Push(max)
 	e.Stack.Push(cur)
@@ -193,7 +193,7 @@ func (e *Eval) lt() error {
 	return nil
 }
 
-func (e *Eval) lt_eq() error {
+func (e *Eval) ltEq() error {
 	var a, b float64
 	var err error
 	b, err = e.Stack.Pop()

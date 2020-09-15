@@ -64,7 +64,7 @@ func (e *Eval) gt() {
 	}
 }
 
-func (e *Eval) gt_eq() {
+func (e *Eval) gtEq() {
 	b := e.Stack.Pop()
 	a := e.Stack.Pop()
 	if a >= b {
@@ -91,7 +91,7 @@ func (e *Eval) loop() {
 	cur := e.Stack.Pop()
 	max := e.Stack.Pop()
 
-	cur += 1
+	cur++
 
 	e.Stack.Push(max)
 	e.Stack.Push(cur)
@@ -107,7 +107,7 @@ func (e *Eval) lt() {
 	}
 }
 
-func (e *Eval) lt_eq() {
+func (e *Eval) ltEq() {
 	b := e.Stack.Pop()
 	a := e.Stack.Pop()
 	if a <= b {
