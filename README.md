@@ -8,6 +8,8 @@
     * [Part 6](#part-6) - Allow conditional execution via `if`/`then`.
     * [Final Revision](#final-revision) - Idiomatic Go, test-cases, and the support for `if`/`else`/`then`.
   * [BUGS](#bugs)
+    * [if](#if)
+    * [loops](#loops)
   * [Github Setup](#github-setup)
 
 
@@ -24,7 +26,7 @@ This repository was created by following the brief tutorial posted within the fo
 
 * https://news.ycombinator.com/item?id=13082825
 
-The end-result of this work is a simple scriptin-language which you could easily embed within your golang application, allowing users to write simple FORTH-like scripts.  We have the kind of features you would expect from a minimal system:
+The end-result of this work is a simple scripting-language which you could easily embed within your golang application, allowing users to write simple FORTH-like scripts.  We have the kind of features you would expect from a minimal system:
 
 * Reverse-Polish mathematical operations.
 * Support for floating-point numbers (anything that will fit inside a `float64`).
@@ -35,6 +37,8 @@ The end-result of this work is a simple scriptin-language which you could easily
 * Support for conditional-execution, via `if`, `else`, and `then`.
 * Load any files specified on the command-line
   * If no arguments are included run the REPL
+* A standard library is loaded, from the present directory, if it is present.
+  * See what we load by default in [foth/foth.4th](foth/foth.4th).
 
 The code evolves through a series of simple steps, guided by the comment-linked, ultimately ending with a featurefull [final revision](#final-revision) which is actually useable.
 
@@ -48,6 +52,7 @@ If you did want to extend further then there _are_ some obvious things to add:
 * Case-insensitive lookup of words.
   * e.g. "dup" should act the same way as "DUP".
 * Pull-requests to add additional functionality to the [final revision](#final-revision) are most welcome.
+* Allow `do`/`loop` and `if`/`else`/`next` to work outside compiled functions.
 
 
 ## Implementation Overview
@@ -276,6 +281,25 @@ See [foth/](foth/) for the implementation.
 
 
 ## BUGS
+
+There are two known-issues at the moment:
+
+### If
+
+You can only use `if`, `else`, and `then` inside word-definitions.  So
+entering this is a failur:
+
+    > 1 1 = if 42 emit cr then
+
+However this works as you'd expect:
+
+    > : foo 1 1 = if 42 emit rc then ;
+    > foo
+
+This is because we only "compile" the input into VM-instructions when compiling words; if we're interpreting them we don't do that.  We _could_ fake this, when we see an `if` we could define an anonymous word, then invoke it immediately.  But that felt a bit gross.
+
+
+### Loops
 
 The handling of loops isn't correct when there should be zero-iterations:
 
