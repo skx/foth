@@ -9,6 +9,7 @@
     * [Final Revision](#final-revision)
   * [TODO](#todo)
   * [BUGS](#bugs)
+  * [Github Setup](#github-setup)
 
 
 # foth
@@ -288,3 +289,8 @@ The handling of loops isn't correct when there should be zero-iterations:
 ```
 
 Should test in the `do` maybe?  Before the first iteration?
+
+
+# Github Setup
+
+This repository is configured to run tests upon every commit, and when pull-requests are created/updated.  The testing is carried out via [.github/run-tests.sh](.github/run-tests.sh) which is used by the [github-action-tester](https://github.com/skx/github-action-tester) action.
