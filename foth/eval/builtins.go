@@ -249,6 +249,7 @@ func (e *Eval) print() error {
 	// when the user runs `5 4 / .`.
 	//
 	output := fmt.Sprintf("%f", a)
+
 	for strings.HasSuffix(output, "0") {
 		output = strings.TrimSuffix(output, "0")
 	}
@@ -290,8 +291,8 @@ func (e *Eval) swap() error {
 	if err != nil {
 		return err
 	}
-	e.Stack.Push(a)
 	e.Stack.Push(b)
+	e.Stack.Push(a)
 
 	return nil
 }
