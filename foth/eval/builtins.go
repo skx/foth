@@ -138,7 +138,6 @@ func (e *Eval) gtEq() error {
 
 func (e *Eval) iff() error {
 	return fmt.Errorf("if can only be used inside a word-definition")
-	return nil
 }
 
 func (e *Eval) invert() error {
