@@ -24,13 +24,16 @@ type Word struct {
 	//
 	// The indexes here are relative to the Dictionary our evaluator
 	// holds/maintains
+	//
+	// NOTE: We specifically store `float64` here so that we can add
+	// floats to the stack when compiling.
 	Words []float64
 }
 
 // Eval is our evaluation structure
 type Eval struct {
 
-	// Internal stack
+	// Stack holds our operands.
 	Stack Stack
 
 	// Dictionary entries
@@ -52,18 +55,18 @@ type Eval struct {
 	ifOffset int
 }
 
-// NewEval returns a simple evaluator
+// NewEval returns a simple evaluator, which will allow executing forth-like words.
 func NewEval() *Eval {
 
 	// Empty structure
 	e := &Eval{}
 
+	// Are we debugging?
 	if os.Getenv("DEBUG") != "" {
 		e.debug = true
 	}
 
-	// Populate the dictionary of words we have implemented
-	// which are hard-coded.
+	// Populate our built-in functions.
 	e.Dictionary = []Word{
 		Word{Name: "*", Function: e.mul},
 		Word{Name: "+", Function: e.add},
@@ -77,8 +80,8 @@ func NewEval() *Eval {
 		Word{Name: "==", Function: e.eq},
 		Word{Name: ">", Function: e.gt},
 		Word{Name: ">=", Function: e.gt_eq},
-		Word{Name: "do", Function: e.do},  // NOP
-		Word{Name: "if", Function: e.iff}, // NOP
+		Word{Name: "do", Function: e.do},
+		Word{Name: "if", Function: e.iff},
 		Word{Name: "invert", Function: e.invert},
 		Word{Name: "drop", Function: e.drop},
 		Word{Name: "dup", Function: e.dup},
@@ -86,7 +89,7 @@ func NewEval() *Eval {
 		Word{Name: "loop", Function: e.loop},
 		Word{Name: "print", Function: e.print},
 		Word{Name: "swap", Function: e.swap},
-		Word{Name: "then", Function: e.then}, // NOP
+		Word{Name: "then", Function: e.then},
 		Word{Name: "words", Function: e.words},
 	}
 
