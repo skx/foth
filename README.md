@@ -9,6 +9,7 @@
     * [Final Revision](#final-revision) - Idiomatic Go, test-cases, and many new words
   * [BUGS](#bugs)
     * [loops](#loops) - zero expected-iterations actually runs once
+  * [See Also](#see-also)
   * [Github Setup](#github-setup)
 
 
@@ -312,6 +313,21 @@ The handling of loops isn't correct when there should be zero-iterations:
 In our `stars` definition we handle this by explicitly testing the loop
 value before we proceed - At the moment any loop of `0 0` will run once
 so you'll need to add that test if we can't fix this for the general case.
+
+
+
+# See Also
+
+This repository was put together after [experimenting with a scripting language](https://github.com/skx/monkey/), an [evaluation engine](https://github.com/skx/
+evalfilter/), and writing a [BASIC interpreter](https://github.com/skx/gobasic).
+
+I've also played around with a couple of compilers which might be interesting to refer to:
+
+* Brainfuck compiler:
+  * [https://github.com/skx/bfcc/](https://github.com/skx/bfcc/)
+* A math-compiler:
+  * [https://github.com/skx/math-compiler](https://github.com/skx/math-compiler)
+
 
 
 # Github Setup
