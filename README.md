@@ -8,8 +8,7 @@
     * [Part 6](#part-6) - Allow conditional execution via `if`/`then`.
     * [Final Revision](#final-revision) - Idiomatic Go, test-cases, and the support for `if`/`else`/`then`.
   * [BUGS](#bugs)
-    * [if](#if)
-    * [loops](#loops)
+    * [loops](#loops) - zero expected-iterations actually runs once
   * [Github Setup](#github-setup)
 
 
@@ -284,21 +283,6 @@ See [foth/](foth/) for the implementation.
 
 There are two known-issues at the moment:
 
-### If
-
-You can only use `if`, `else`, and `then` inside word-definitions.  So
-entering this is a failur:
-
-    > 1 1 = if 42 emit cr then
-
-However this works as you'd expect:
-
-    > : foo 1 1 = if 42 emit rc then ;
-    > foo
-
-This is because we only "compile" the input into VM-instructions when compiling words; if we're interpreting them we don't do that.  We _could_ fake this, when we see an `if` we could define an anonymous word, then invoke it immediately.  But that felt a bit gross.
-
-
 ### Loops
 
 The handling of loops isn't correct when there should be zero-iterations:
@@ -315,7 +299,9 @@ The handling of loops isn't correct when there should be zero-iterations:
      ^D
 ```
 
-Should test in the `do` maybe?  Before the first iteration?
+In our `stars` definition we handle this by explicitly testing the loop
+value before we proceed - At the moment any loop of `0 0` will run once
+so you'll need to add that test if we can't fix this for the general case.
 
 
 # Github Setup
