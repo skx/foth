@@ -26,7 +26,10 @@
 #
 #        e.g. "3 stars"
 #
-: stars 0 do star loop 10 emit ;
+# We add a test here to make sure that the user enters > 0
+# as their argument
+#
+: stars dup 0 > if 0 do star loop else drop then cr ;
 
 
 #

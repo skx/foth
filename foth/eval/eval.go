@@ -178,31 +178,28 @@ func (e *Eval) Eval(args []string) error {
 // compileToken is called with a new token, when we're in compiling-mode.
 func (e *Eval) compileToken(tok string) error {
 
-	fmt.Printf("compileToken(%s)\n", tok)
-
 	// Did we start in immediate-mode?
 	imm := (e.compiling == false && e.immediate > 0)
 
 	if imm {
 
 		// In immediate mode we just setup a bogus
-		// word which we then execute.
+		// word-name, which can never be legal.
+		//
+		// We'll then execute it immediately post-definition.
 		e.tmp.Name = "$ $"
-		fmt.Printf("compileToken '%s' in immediate mode\n", tok)
 	}
 
 	// If we don't have a name
 	if e.tmp.Name == "" {
 
-		// is the name used?
+		// is the name used?  If so remove it
 		idx := e.findWord(tok)
 		if idx != -1 {
-
-			// The name is used, so we need to remove it
 			e.Dictionary[idx].Name = ""
 		}
 
-		// save the name - if we didn't just fake it.
+		// save the name
 		e.tmp.Name = tok
 		return nil
 	}
@@ -335,11 +332,13 @@ func (e *Eval) compileToken(tok string) error {
 
 			if e.immediate == 0 && imm {
 
-				fmt.Printf("We've completed the temporary word!\n")
 				// We've compiled the word.
 				e.Dictionary = append(e.Dictionary, e.tmp)
 
-				e.dumpWords()
+				if e.debug {
+					fmt.Printf("Completed the temporary word - '$ $'\n")
+					e.dumpWords()
+				}
 
 				// reset for the next definition
 				e.tmp.Name = ""
@@ -399,7 +398,7 @@ func (e *Eval) evalWord(index int) error {
 	if word.Function != nil {
 
 		if e.debug {
-			fmt.Printf(" calling %s\n", word.Name)
+			fmt.Printf(" calling built-in word %s\n", word.Name)
 		}
 		err := word.Function()
 		return err
@@ -546,6 +545,7 @@ func (e *Eval) findWord(name string) int {
 	return -1
 }
 
+// dumpWords dumps the definition of the last-created addition.
 func (e *Eval) dumpWords() {
 	codes := []string{}
 
