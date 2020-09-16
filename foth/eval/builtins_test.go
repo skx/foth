@@ -47,6 +47,9 @@ func TestDebug(t *testing.T) {
 
 	var val float64
 	val, err = e.Stack.Pop()
+	if err != nil {
+		t.Errorf("unexpected error")
+	}
 	if val != 0 {
 		t.Fatalf("debug value is wrong")
 	}
@@ -70,6 +73,9 @@ func TestDebug(t *testing.T) {
 		t.Fatalf("unexpected error")
 	}
 	val, err = e.Stack.Pop()
+	if err != nil {
+		t.Errorf("unexpected error")
+	}
 	if val != 1 {
 		t.Fatalf("debug value is wrong")
 	}
@@ -87,6 +93,9 @@ func TestDebug(t *testing.T) {
 		t.Fatalf("unexpected error")
 	}
 	val, err = e.Stack.Pop()
+	if err != nil {
+		t.Errorf("unexpected error")
+	}
 	if val != 0 {
 		t.Fatalf("debug value is wrong")
 	}
