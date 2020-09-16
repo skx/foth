@@ -5,6 +5,56 @@ import (
 	"testing"
 )
 
+// Comments should be reoved
+func TestComment(t *testing.T) {
+
+	l := New(` to \ This is a comment
+( comment here )fo
+`)
+
+	out, err := l.Tokens()
+	if err != nil {
+		t.Fatalf("error lexing: %s", err)
+	}
+	if len(out) != 2 {
+		t.Fatalf("Unexpected output, got: %v", out)
+	}
+	if out[0].Name != "to" {
+		t.Fatalf("got bad prefix")
+	}
+	if out[1].Name != "fo" {
+		t.Fatalf("got bad suffix")
+	}
+}
+
+// Nested comments are a bug
+func TestCommentNested(t *testing.T) {
+
+	l := New("  ( comment ( here ) ) ")
+
+	_, err := l.Tokens()
+	if err == nil {
+		t.Fatalf("expected error, but got none")
+	}
+	if !strings.Contains(err.Error(), "nested comments") {
+		t.Fatalf("got an error, but the wrong one")
+	}
+}
+
+// Unterminated comments are a bug
+func TestCommentUnterminated(t *testing.T) {
+
+	l := New("  ( comment here ")
+
+	_, err := l.Tokens()
+	if err == nil {
+		t.Fatalf("expected error, but got none")
+	}
+	if !strings.Contains(err.Error(), "unterminated comment") {
+		t.Fatalf("got an error, but the wrong one")
+	}
+}
+
 // Empty input should give empty output
 func TestEmpty(t *testing.T) {
 	l := New(" \t \r \n")

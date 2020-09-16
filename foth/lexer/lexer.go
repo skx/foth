@@ -56,6 +56,39 @@ func (l *Lexer) Tokens() ([]Token, error) {
 				cur = ""
 			}
 
+		case "\\":
+			// Comment to the end of the line
+			for offset < len(l.input) {
+				if l.input[offset] == '\n' {
+					break
+				}
+				offset++
+			}
+
+		case "(":
+
+			// skip the "("
+			offset++
+
+			// Eat the comment - which is everything
+			// between the "(" and ")" (inclusive)
+			//
+			// NOTE: Nested comments are prohibited
+			closed := false
+			for offset < len(l.input) {
+				if l.input[offset] == ')' {
+					closed = true
+					break
+				}
+				if l.input[offset] == '(' {
+					return res, fmt.Errorf("nested comments are illegal")
+				}
+				offset++
+			}
+			if !closed {
+				return res, fmt.Errorf("unterminated comment")
+			}
+
 		case ".":
 
 			// ensure we don't walk off the array
