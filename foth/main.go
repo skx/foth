@@ -41,7 +41,7 @@ func doInit(eval *eval.Eval, path string) error {
 		if !strings.HasPrefix(line, "#") {
 
 			// Evaluate
-			err := eval.Eval(strings.Split(line, " "))
+			err := eval.Eval(line)
 			if err != nil {
 				fmt.Printf("ERROR: %s\n", err.Error())
 			}
@@ -103,7 +103,7 @@ func main() {
 		// Trim it
 		text = strings.TrimSpace(text)
 
-		err = forth.Eval(strings.Split(text, " "))
+		err = forth.Eval(text)
 		if err != nil {
 			fmt.Printf("ERROR: %s\n", err.Error())
 		}
