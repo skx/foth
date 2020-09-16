@@ -147,7 +147,7 @@ func (e *Eval) Eval(args []string) error {
 		if idx != -1 {
 
 			// Are we starting immediate mode?
-			if e.compiling == false && e.Dictionary[idx].StartImmediate {
+			if !e.compiling && e.Dictionary[idx].StartImmediate {
 				e.immediate++
 
 				err := e.compileToken(tok)
@@ -181,7 +181,7 @@ func (e *Eval) Eval(args []string) error {
 func (e *Eval) compileToken(tok string) error {
 
 	// Did we start in immediate-mode?
-	imm := (e.compiling == false && e.immediate > 0)
+	imm := (!e.compiling && e.immediate > 0)
 
 	if imm {
 
@@ -328,7 +328,7 @@ func (e *Eval) compileToken(tok string) error {
 		if e.Dictionary[idx].EndImmediate {
 
 			// If we're inside an immediate
-			if e.compiling == false && e.immediate > 0 {
+			if !e.compiling && e.immediate > 0 {
 				e.immediate--
 			}
 
