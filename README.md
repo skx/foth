@@ -222,7 +222,7 @@ See [part6/](part6/) for the code.
 
 **NOTE**: The `if` handler allows:
 
-   : foo $COND IF word1 [word2 .. wordN] then [more_word1 more_word2 ..] ;
+    : foo $COND IF word1 [word2 .. wordN] then [more_word1 more_word2 ..] ;
 
 This means if the condition is true then we run `word1`, `word2` .. and otherwise we skip them, and continue running after the `then` statement.  Specifically note there is **no support for `else`**.  That is why we call the `test_host` and `test_cold` words in our `test` definition.  Each word tests separately.
 
@@ -261,6 +261,14 @@ I found this page useful, it also documents `invert` which I added for completen
 ### Final Revision
 
 The final version, stored beneath [foth/](foth/), is largely identical to the previous part, in the sense that there are no significant new additions to the interpreter, or the predefined list of words.
+
+However the `if` handling has been updated to support an `else`-branch, the general form is now:
+
+    $COND IF word1 [ .. wordN ] else alt_word1 [.. altN] then [more_word1 more_word2 ..]
+
+It is also now possible to use `if`, `else`, `then`, `do`, and `loop` outside word-definitions.  (i.e. Immediately.)
+
+There are two new words `debug` to change the debug-flag, and `debug?` to reveal the status - but these are not hugely significant.
 
 The aim of the final-version was to add test-cases, ensure that the code is more idiomatic, etc.
 
