@@ -9,6 +9,7 @@ import (
 func TestBasic(t *testing.T) {
 
 	e := New()
+	e.debug = true
 	out := e.Eval("  . ")
 
 	if out == nil {
@@ -25,19 +26,22 @@ func TestDumpWords(t *testing.T) {
 	if e.debug != true {
 		t.Fatalf("putenv didn't enable debugging")
 	}
-	os.Setenv("DEBUG", "")
 
 	// test definitions
 	tests := []string{": star 42 emit ;",
 		": stars 0 do star loop 10 emit ;",
 		": test_hot  0 > if star then star ;",
-		": tests 0 0 = if 1 else 2 then ;"}
+		": tests 0 0 = if 1 else 2 then ;",
+		": tests 0 0 = if .\" test \" else .\" ok\" ;",
+		"0 0 = if .\" test \" else .\" ok\"",
+	}
 
 	for _, str := range tests {
 		e.Eval(str)
 	}
 
 	e.dumpWord(0)
+	os.Setenv("DEBUG", "")
 }
 
 // Try running one of each of our test-cases
@@ -45,6 +49,7 @@ func TestEvalWord(t *testing.T) {
 
 	// dummy test
 	e := New()
+	e.debug = true
 
 	// test definitions
 	tests := []string{": star 42 emit ;",
@@ -71,6 +76,7 @@ func TestFloatFail(t *testing.T) {
 
 	for _, str := range tests {
 		e := New()
+		e.debug = true
 		err := e.Eval(str)
 		if err == nil {
 			t.Fatalf("expected error processing '%s', got none", str)
@@ -90,7 +96,9 @@ func TestIfThenElse(t *testing.T) {
 
 	tests := []Test{
 		Test{input: "3 3 = if 1 then", result: 1},
+		Test{input: "3 3 = if .\" ok \" 1 then", result: 1},
 		Test{input: ": f 3 3 = if 1 then ; f", result: 1},
+		Test{input: ": f 3 3 = if .\" ok \" 1 then ; f", result: 1},
 
 		Test{input: "3 3 = invert if 1 else 2 then", result: 2},
 		Test{input: ": f 3 3 = invert if 1 else 2 then ; f", result: 2},
@@ -108,6 +116,7 @@ func TestIfThenElse(t *testing.T) {
 	for _, test := range tests {
 
 		e := New()
+		e.debug = true
 		err := e.Eval(test.input)
 		if err != nil {
 			t.Fatalf("unexpected error processing '%s': %s", test.input, err.Error())
