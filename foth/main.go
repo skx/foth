@@ -16,6 +16,12 @@ import (
 	"foth/eval"
 )
 
+// "secret" word
+func secret() error {
+	fmt.Printf("nothing happens\n")
+	return nil
+}
+
 // If the given file exists, read the contents, and evaluate it
 func doInit(eval *eval.Eval, path string) error {
 
@@ -63,6 +69,8 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 	forth := eval.New()
+
+	forth.Dictionary = append(forth.Dictionary, eval.Word{Name: "xyzzy", Function: secret})
 
 	// Load the init-file if it is present.
 	//

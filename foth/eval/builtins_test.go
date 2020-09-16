@@ -35,6 +35,63 @@ func TestAdd(t *testing.T) {
 	}
 }
 
+func TestDebug(t *testing.T) {
+
+	e := New()
+
+	// debug is off
+	err := e.debugp()
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	var val float64
+	val, err = e.Stack.Pop()
+	if val != 0 {
+		t.Fatalf("debug value is wrong")
+	}
+
+	// empty stack
+	err = e.debugSet()
+	if err == nil {
+		t.Fatalf("expected error with empty stack; got none")
+	}
+
+	// set debug
+	e.Stack.Push(1)
+	err = e.debugSet()
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	// Getting it should confirm it is set.
+	err = e.debugp()
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+	val, err = e.Stack.Pop()
+	if val != 1 {
+		t.Fatalf("debug value is wrong")
+	}
+
+	// Now set it off
+	e.Stack.Push(0)
+	err = e.debugSet()
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	// and it should be off
+	err = e.debugp()
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+	val, err = e.Stack.Pop()
+	if val != 0 {
+		t.Fatalf("debug value is wrong")
+	}
+
+}
 func TestDiv(t *testing.T) {
 
 	e := New()
@@ -66,14 +123,6 @@ func TestDiv(t *testing.T) {
 	}
 }
 
-func TestDo(t *testing.T) {
-
-	e := New()
-	if e.do() != nil {
-		t.Fatalf("unexpected error")
-	}
-}
-
 func TestDrop(t *testing.T) {
 
 	e := New()
@@ -90,6 +139,39 @@ func TestDrop(t *testing.T) {
 	}
 }
 
+func TestDump(t *testing.T) {
+
+	e := New()
+
+	// test with empty stack
+	err := e.dump()
+	if err == nil {
+		t.Fatalf("expected error, got none")
+	}
+
+	// count the words
+	if e.wordLen() != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	count, err := e.Stack.Pop()
+	if err != nil {
+		t.Fatalf("stack error")
+	}
+
+	// for each word
+	cur := 0
+	for cur < int(count) {
+
+		e.Stack.Push(float64(cur))
+		e.dump()
+
+		if !e.Stack.IsEmpty() {
+			t.Fatalf("stack surprise")
+		}
+		cur++
+	}
+}
 func TestDup(t *testing.T) {
 
 	e := New()
@@ -301,14 +383,6 @@ func TestInvert(t *testing.T) {
 
 }
 
-func TestIff(t *testing.T) {
-
-	e := New()
-	if e.iff() != nil {
-		t.Fatalf("unexpected error")
-	}
-}
-
 func TestLoop(t *testing.T) {
 
 	e := New()
@@ -469,6 +543,14 @@ func TestMul(t *testing.T) {
 	}
 }
 
+func TestNop(t *testing.T) {
+
+	e := New()
+	if e.nop() != nil {
+		t.Fatalf("unexpected error")
+	}
+}
+
 func TestPrint(t *testing.T) {
 	e := New()
 
@@ -578,18 +660,30 @@ func TestSwap(t *testing.T) {
 	}
 }
 
-func TestThen(t *testing.T) {
-
-	e := New()
-	if e.then() != nil {
-		t.Fatalf("unexpected error")
-	}
-}
-
 func TestWords(t *testing.T) {
 
 	e := New()
 	if e.words() != nil {
 		t.Fatalf("unexpected error")
+	}
+}
+
+func TestWordLen(t *testing.T) {
+
+	e := New()
+	if e.wordLen() != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	if e.Stack.IsEmpty() {
+		t.Fatalf("expected stack entry")
+	}
+
+	count, err := e.Stack.Pop()
+	if err != nil {
+		t.Fatalf("stack error")
+	}
+	if int(count) > len(e.Dictionary) {
+		t.Fatalf("too many wrds")
 	}
 }

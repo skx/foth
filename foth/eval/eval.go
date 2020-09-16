@@ -90,26 +90,29 @@ func New() *Eval {
 		Word{Name: ".", Function: e.print},
 		Word{Name: "/", Function: e.div},
 		Word{Name: ":", Function: e.startDefinition},
+		Word{Name: ";", Function: e.nop},
 		Word{Name: "<", Function: e.lt},
 		Word{Name: "<=", Function: e.ltEq},
 		Word{Name: "=", Function: e.eq},
 		Word{Name: "==", Function: e.eq},
 		Word{Name: ">", Function: e.gt},
 		Word{Name: ">=", Function: e.gtEq},
+		Word{Name: "dump", Function: e.dump},
 		Word{Name: "debug", Function: e.debugSet},
 		Word{Name: "debug?", Function: e.debugp},
-		Word{Name: "do", Function: e.do, StartImmediate: true},
+		Word{Name: "do", Function: e.nop, StartImmediate: true},
 		Word{Name: "drop", Function: e.drop},
 		Word{Name: "dup", Function: e.dup},
-		Word{Name: "else", Function: e.elsee},
+		Word{Name: "else", Function: e.nop},
 		Word{Name: "emit", Function: e.emit},
-		Word{Name: "if", Function: e.iff, StartImmediate: true},
+		Word{Name: "if", Function: e.nop, StartImmediate: true},
 		Word{Name: "invert", Function: e.invert},
 		Word{Name: "loop", Function: e.loop, EndImmediate: true},
 		Word{Name: "print", Function: e.print},
 		Word{Name: "swap", Function: e.swap},
-		Word{Name: "then", Function: e.then, EndImmediate: true},
+		Word{Name: "then", Function: e.nop, EndImmediate: true},
 		Word{Name: "words", Function: e.words},
+		Word{Name: "#words", Function: e.wordLen},
 	}
 
 	return e
@@ -215,7 +218,7 @@ func (e *Eval) compileToken(tok string) error {
 		// Show what we compiled each new definition
 		// to, when running in debug-mode
 		if e.debug {
-			e.dumpWords()
+			e.dumpWord(len(e.Dictionary) - 1)
 		}
 
 		// reset for the next definition
@@ -339,7 +342,7 @@ func (e *Eval) compileToken(tok string) error {
 
 				if e.debug {
 					fmt.Printf("Completed the temporary word - '$ $'\n")
-					e.dumpWords()
+					e.dumpWord(len(e.Dictionary) - 1)
 				}
 
 				// reset for the next definition
@@ -411,7 +414,10 @@ func (e *Eval) evalWord(index int) error {
 	}
 
 	//
-	// TODO: Improve the way these special cases are handled.
+	// We use a simple state-machine to handle some of our
+	// "opcodes".  Opcodes are basically indexes into our
+	// dictionary of previously-defined words, and also some
+	// special codes (which are less than zero).
 	//
 	// The reason this is handled like this, is to avoid poking the
 	// indexes directly and risking array-overflow on malformed
@@ -422,17 +428,7 @@ func (e *Eval) evalWord(index int) error {
 	// to avoid messing around with the index to avoid that.)
 	//
 
-	// Adding a number?
-	addNum := false
-
-	// jumping?
-	jump := false
-
-	// Loop jump
-	loopJump := false
-
-	// jumping if the stack has a false-value?
-	condJump := false
+	state := "default"
 
 	// We need to allow control-jumps now, so we
 	// have to store our index manually.
@@ -443,15 +439,17 @@ func (e *Eval) evalWord(index int) error {
 		opcode := word.Words[ip]
 
 		// adding a number?
-		if addNum {
+		if state == "add-number" {
 			if e.debug {
 				fmt.Printf(" storing %f on stack\n", opcode)
 			}
 
 			// add to stack
 			e.Stack.Push(opcode)
-			addNum = false
-		} else if loopJump {
+
+			state = "default"
+
+		} else if state == "loop-jump" {
 			// If the two top-most entries
 			// are not equal, then jump
 			cur, ee := e.Stack.Pop()
@@ -476,8 +474,8 @@ func (e *Eval) evalWord(index int) error {
 				ip--
 			}
 
-			loopJump = false
-		} else if condJump {
+			state = "default"
+		} else if state == "cond-jump" {
 			// Jump only if 0 is on the top of the stack.
 			//
 			// i.e. This is an "if" test.
@@ -501,32 +499,34 @@ func (e *Eval) evalWord(index int) error {
 					fmt.Printf(" popped %f from stack - not making conditional jump\n", val)
 				}
 			}
-			condJump = false
-		} else if jump {
+			state = "default"
+		} else if state == "jump" {
 			// change opcode
 			ip = int(opcode)
 			// decrement as it'll get bumped at
 			// the foot of the loop
 			ip--
-			jump = false
-		} else {
+			state = "default"
+		} else if state == "default" {
 
 			// if we see -1 we're adding a number
 			switch opcode {
 			case -1:
-				addNum = true
+				state = "add-number"
 			case -2:
-				loopJump = true
+				state = "loop-jump"
 			case -3:
-				condJump = true
+				state = "cond-jump"
 			case -4:
-				jump = true
+				state = "jump"
 			default:
 				err := e.evalWord(int(opcode))
 				if err != nil {
 					return err
 				}
 			}
+		} else {
+			return fmt.Errorf("unknown state '%s'", state)
 		}
 
 		// next instruction
@@ -547,33 +547,42 @@ func (e *Eval) findWord(name string) int {
 	return -1
 }
 
-// dumpWords dumps the definition of the last-created addition.
-func (e *Eval) dumpWords() {
+// dumpWord dumps the definition of the given word.
+func (e *Eval) dumpWord(idx int) {
+
+	word := e.Dictionary[idx]
+
 	codes := []string{}
 
-	// Show the names of the codes,
-	// as well as their indexes
+	// Show the names of the codes, as well as their indexes
 	off := 0
-	for off < len(e.tmp.Words) {
+	for off < len(word.Words) {
 
-		v := e.tmp.Words[int(off)]
+		v := word.Words[int(off)]
 
 		if v == -1 {
-			codes = append(codes, fmt.Sprintf("%d: store %f", off, e.tmp.Words[off+1]))
+			codes = append(codes, fmt.Sprintf("%d: store %f", off, word.Words[off+1]))
 			off++
 		} else if v == -2 {
-			codes = append(codes, fmt.Sprintf("%d: [loop-jmp %f]", off, e.tmp.Words[off+1]))
+			codes = append(codes, fmt.Sprintf("%d: [loop-jmp %f]", off, word.Words[off+1]))
 			off++
 		} else if v == -3 {
-			codes = append(codes, fmt.Sprintf("%d: [cond-jmp %f]", off, e.tmp.Words[off+1]))
+			codes = append(codes, fmt.Sprintf("%d: [cond-jmp %f]", off, word.Words[off+1]))
 			off++
 		} else if v == -4 {
-			codes = append(codes, fmt.Sprintf("%d: [jmp %f]", off, e.tmp.Words[off+1]))
+			codes = append(codes, fmt.Sprintf("%d: [jmp %f]", off, word.Words[off+1]))
 			off++
 		} else {
 			codes = append(codes, fmt.Sprintf("%d: %s", off, e.Dictionary[int(v)].Name))
 		}
 		off++
 	}
-	fmt.Printf("Compiled word '%s'\n %s\n", e.tmp.Name, strings.Join(codes, "\n "))
+
+	// Didn't decompile?  Then it was a native-word
+	if len(codes) == 0 {
+		fmt.Printf("Word '%s' - native\n", word.Name)
+	} else {
+		// Otherwise show the bytecode.
+		fmt.Printf("Word '%s'\n %s\n", word.Name, strings.Join(codes, "\n "))
+	}
 }

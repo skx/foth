@@ -70,13 +70,19 @@ func (e *Eval) div() error {
 	return nil
 }
 
-func (e *Eval) do() error {
-	return nil
-}
-
 func (e *Eval) drop() error {
 	_, err := e.Stack.Pop()
 	return err
+}
+
+func (e *Eval) dump() error {
+	a, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+
+	e.dumpWord(int(a))
+	return nil
 }
 
 func (e *Eval) dup() error {
@@ -87,10 +93,6 @@ func (e *Eval) dup() error {
 	e.Stack.Push(a)
 	e.Stack.Push(a)
 
-	return nil
-}
-
-func (e *Eval) elsee() error {
 	return nil
 }
 
@@ -157,10 +159,6 @@ func (e *Eval) gtEq() error {
 	} else {
 		e.Stack.Push(0)
 	}
-	return nil
-}
-
-func (e *Eval) iff() error {
 	return nil
 }
 
@@ -255,6 +253,9 @@ func (e *Eval) mul() error {
 	return nil
 }
 
+func (e *Eval) nop() error {
+	return nil
+}
 func (e *Eval) print() error {
 	a, err := e.Stack.Pop()
 	if err != nil {
@@ -323,19 +324,38 @@ func (e *Eval) swap() error {
 	return nil
 }
 
-func (e *Eval) then() error {
-	return nil
-}
-
 func (e *Eval) words() error {
 	known := []string{}
 
 	for _, entry := range e.Dictionary {
-		known = append(known, entry.Name)
+
+		// Skip any word that contains a " " in its name,
+		// this covers "$ $" which is a hack to execute
+		// immediately-compiled words
+		if !strings.Contains(entry.Name, " ") {
+			known = append(known, entry.Name)
+		}
 	}
 
 	sort.Strings(known)
 	fmt.Printf("%s\n", strings.Join(known, " "))
 
+	return nil
+}
+
+func (e *Eval) wordLen() error {
+	known := []string{}
+
+	for _, entry := range e.Dictionary {
+
+		// Skip any word that contains a " " in its name,
+		// this covers "$ $" which is a hack to execute
+		// immediately-compiled words
+		if !strings.Contains(entry.Name, " ") {
+			known = append(known, entry.Name)
+		}
+	}
+
+	e.Stack.Push(float64(len(known)))
 	return nil
 }

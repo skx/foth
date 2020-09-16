@@ -30,13 +30,14 @@ func TestDumpWords(t *testing.T) {
 	// test definitions
 	tests := []string{": star 42 emit ;",
 		": stars 0 do star loop 10 emit ;",
-		": test_hot  0 > if star then star ;"}
+		": test_hot  0 > if star then star ;",
+		": tests 0 0 = if 1 else 2 then ;"}
 
 	for _, str := range tests {
 		e.Eval(strings.Split(str, " "))
 	}
 
-	e.dumpWords()
+	e.dumpWord(0)
 }
 
 // Try running one of each of our test-cases
