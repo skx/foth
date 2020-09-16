@@ -29,7 +29,16 @@
 # We add a test here to make sure that the user enters > 0
 # as their argument
 #
-: stars dup 0 > if 0 do star loop else drop then cr ;
+: stars dup 0 > if 0 do star loop else drop then ;
+
+#
+# Squares: Draw a box
+#
+#          e.g. 10 squares
+#
+: squares 0 do
+   over stars cr
+  loop ;
 
 
 #
@@ -42,15 +51,17 @@
 #
 : cube dup square * ;
 
+
 #
 # 1+: add one to a number
 #
 : 1+ 1 + ;
 
+
 #
 # boot: output a message on-startup
 #
-: bootup 87 emit 101 emit 108 emit 99 emit 111 emit 109 emit 101 emit 32 emit 116 emit 111 emit 32 emit 102 emit 111 emit 116 emit 104 emit 33 emit 10 emit ;
+: bootup ." Welcome to foth!\n " ;
 bootup
 
 
@@ -64,15 +75,13 @@ bootup
 # added this example.
 #
 
-# output "Hot"
-: hot 72 emit 111 emit 116 emit 10 emit ;
+# output a hot/cold message
+: hot  ." Hot\n  " ;
+: cold ." Cold\n " ;
 
-# Output "Cold"
-: cold 67 emit 111 emit 108 emit 100 emit 10 emit ;
-
-: test_hot  0 > if hot then ;
+: test_hot   0 >  if hot then ;
 : test_cold  0 <= if cold then ;
-: temp dup test_hot test_cold ;
+: temp? dup test_hot test_cold ;
 
 
 #
@@ -86,8 +95,11 @@ bootup
 # Output "NOT frozen\n"
 : non_frozen 78 emit 79 emit 84 emit 32 emit 102 emit 114 emit 111 emit 122 emit  101 emit 110 emit 10 emit ;
 
-# Output one or othre of the messages?
+# Output one or other of the messages?
 : frozen? 0 <= if frozen else non_frozen then cr ;
+
+# All in one.
+: frozen2? 0 <= if ." frozen " else ." not frozen " then cr ;
 
 
 #
