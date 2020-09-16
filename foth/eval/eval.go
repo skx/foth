@@ -96,6 +96,8 @@ func New() *Eval {
 		Word{Name: "==", Function: e.eq},
 		Word{Name: ">", Function: e.gt},
 		Word{Name: ">=", Function: e.gtEq},
+		Word{Name: "debug", Function: e.debugSet},
+		Word{Name: "debug?", Function: e.debugp},
 		Word{Name: "do", Function: e.do, StartImmediate: true},
 		Word{Name: "drop", Function: e.drop},
 		Word{Name: "dup", Function: e.dup},

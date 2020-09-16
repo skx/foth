@@ -29,6 +29,30 @@ func (e *Eval) add() error {
 	return nil
 }
 
+func (e *Eval) debugSet() error {
+
+	v, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	if v == 0 {
+		e.debug = false
+	} else {
+		e.debug = true
+	}
+
+	return nil
+}
+
+func (e *Eval) debugp() error {
+	if e.debug {
+		e.Stack.Push(1)
+	} else {
+		e.Stack.Push(0)
+	}
+	return nil
+}
+
 func (e *Eval) div() error {
 	var a, b float64
 	var err error
