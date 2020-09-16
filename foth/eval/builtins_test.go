@@ -623,7 +623,7 @@ func TestSub(t *testing.T) {
 	}
 
 	x, _ := e.Stack.Pop()
-	if x != -2 {
+	if x != 2 {
 		t.Fatalf("wrong result for sub, got %f", x)
 	}
 }

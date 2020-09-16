@@ -319,7 +319,7 @@ func (e *Eval) sub() error {
 	if err != nil {
 		return err
 	}
-	e.Stack.Push(b - a)
+	e.Stack.Push(a - b)
 	return nil
 }
 
