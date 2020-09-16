@@ -9,7 +9,7 @@ import (
 func TestBasic(t *testing.T) {
 
 	e := New()
-	out := e.Eval([]string{"", ".", " "})
+	out := e.Eval("  . ")
 
 	if out == nil {
 		t.Fatalf("expected error, got none")
@@ -34,7 +34,7 @@ func TestDumpWords(t *testing.T) {
 		": tests 0 0 = if 1 else 2 then ;"}
 
 	for _, str := range tests {
-		e.Eval(strings.Split(str, " "))
+		e.Eval(str)
 	}
 
 	e.dumpWord(0)
@@ -59,7 +59,7 @@ func TestEvalWord(t *testing.T) {
 		"-1 test_hot"}
 
 	for _, str := range tests {
-		e.Eval(strings.Split(str, " "))
+		e.Eval(str)
 	}
 
 }
@@ -71,7 +71,7 @@ func TestFloatFail(t *testing.T) {
 
 	for _, str := range tests {
 		e := New()
-		err := e.Eval(strings.Split(str, " "))
+		err := e.Eval(str)
 		if err == nil {
 			t.Fatalf("expected error processing '%s', got none", str)
 		}
@@ -108,7 +108,7 @@ func TestIfThenElse(t *testing.T) {
 	for _, test := range tests {
 
 		e := New()
-		err := e.Eval(strings.Split(test.input, " "))
+		err := e.Eval(test.input)
 		if err != nil {
 			t.Fatalf("unexpected error processing '%s': %s", test.input, err.Error())
 		}

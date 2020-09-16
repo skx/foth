@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"foth/lexer"
 	"foth/stack"
 )
 
@@ -118,12 +119,39 @@ func New() *Eval {
 	return e
 }
 
-// Eval processes a list of tokens.
+// Eval evaluates the given expression.
 //
 // This is invoked by our repl with a line of input at the time.
-func (e *Eval) Eval(args []string) error {
+func (e *Eval) Eval(input string) error {
 
-	for _, tok := range args {
+	// Lex our input string into a series of tokens.
+	//
+	// This is done for two reasons:
+	//
+	//  1.  We want to remove comments
+	//
+	//  2.  We support inline strings, such as the following:
+	//
+	//       ." foo bar "
+	//
+	//      Blindly splitting on whitespace would screw those up
+	//
+	l := lexer.New(input)
+	args, err := l.Tokens()
+	if err != nil {
+		return err
+	}
+
+	//
+	// For each token..
+	//
+	for _, token := range args {
+
+		// Get the name of the token.
+		//
+		// The name is the only thing we care about, except
+		// in the case of string-literals
+		tok := token.Name
 
 		// Trim the leading/trailing spaces,
 		// and skip any empty tokens
@@ -131,7 +159,6 @@ func (e *Eval) Eval(args []string) error {
 		if tok == "" {
 			continue
 		}
-
 		// Are we in compiling mode?
 		if e.compiling || (e.immediate > 0) {
 
