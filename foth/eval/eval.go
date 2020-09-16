@@ -85,6 +85,7 @@ func New() *Eval {
 
 	// Populate our built-in functions.
 	e.Dictionary = []Word{
+		Word{Name: "#words", Function: e.wordLen},
 		Word{Name: "*", Function: e.mul},
 		Word{Name: "+", Function: e.add},
 		Word{Name: "-", Function: e.sub},
@@ -98,11 +99,11 @@ func New() *Eval {
 		Word{Name: "==", Function: e.eq},
 		Word{Name: ">", Function: e.gt},
 		Word{Name: ">=", Function: e.gtEq},
-		Word{Name: "dump", Function: e.dump},
 		Word{Name: "debug", Function: e.debugSet},
 		Word{Name: "debug?", Function: e.debugp},
 		Word{Name: "do", Function: e.nop, StartImmediate: true},
 		Word{Name: "drop", Function: e.drop},
+		Word{Name: "dump", Function: e.dump},
 		Word{Name: "dup", Function: e.dup},
 		Word{Name: "else", Function: e.nop},
 		Word{Name: "emit", Function: e.emit},
@@ -113,7 +114,6 @@ func New() *Eval {
 		Word{Name: "swap", Function: e.swap},
 		Word{Name: "then", Function: e.nop, EndImmediate: true},
 		Word{Name: "words", Function: e.words},
-		Word{Name: "#words", Function: e.wordLen},
 	}
 
 	return e
