@@ -291,7 +291,7 @@ See [foth/](foth/) for the implementation.
 
 ## BUGS
 
-There are two known-issues at the moment:
+A brief list of known-issues:
 
 ### Loops
 
