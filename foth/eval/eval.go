@@ -48,6 +48,9 @@ type Eval struct {
 	// Dictionary entries
 	Dictionary []Word
 
+	// Literal strings.  As encountered in our program.
+	strings []string
+
 	// Are we in a compiling mode?
 	compiling bool
 
@@ -90,6 +93,7 @@ func New() *Eval {
 		Word{Name: "+", Function: e.add},
 		Word{Name: "-", Function: e.sub},
 		Word{Name: ".", Function: e.print},
+		Word{Name: ".\"", Function: e.nop},
 		Word{Name: "/", Function: e.div},
 		Word{Name: ":", Function: e.startDefinition},
 		Word{Name: ";", Function: e.nop},
@@ -110,6 +114,7 @@ func New() *Eval {
 		Word{Name: "if", Function: e.nop, StartImmediate: true},
 		Word{Name: "invert", Function: e.invert},
 		Word{Name: "loop", Function: e.loop, EndImmediate: true},
+		Word{Name: "over", Function: e.over},
 		Word{Name: "print", Function: e.print},
 		Word{Name: "swap", Function: e.swap},
 		Word{Name: "then", Function: e.nop, EndImmediate: true},
@@ -159,16 +164,23 @@ func (e *Eval) Eval(input string) error {
 		if tok == "" {
 			continue
 		}
+
 		// Are we in compiling mode?
 		if e.compiling || (e.immediate > 0) {
 
 			// If so compile the token
-			err := e.compileToken(tok)
+			err := e.compileToken(token)
 			if err != nil {
 				return err
 			}
 
 			// And loop around.
+			continue
+		}
+
+		// Is this an immediate print?  If so do it.
+		if tok == ".\"" {
+			e.printString(token.Value)
 			continue
 		}
 
@@ -180,7 +192,7 @@ func (e *Eval) Eval(input string) error {
 			if !e.compiling && e.Dictionary[idx].StartImmediate {
 				e.immediate++
 
-				err := e.compileToken(tok)
+				err := e.compileToken(token)
 				if err != nil {
 					return err
 				}
@@ -208,21 +220,36 @@ func (e *Eval) Eval(input string) error {
 }
 
 // compileToken is called with a new token, when we're in compiling-mode.
-func (e *Eval) compileToken(tok string) error {
+//
+// This is called in two ways:
+//
+//  1.  To compile a new word.
+//
+//  2.  In "immediate" mode.  Where we compile a fake word,
+//     with an impossible name (`$ $`), with the expectation
+//     we'll then immediately execute it.
+//
+func (e *Eval) compileToken(token lexer.Token) error {
+
+	tok := token.Name
 
 	// Did we start in immediate-mode?
+	//
+	// We keep track of this here, because we might
+	// disable immediate-mode later and need to know.
 	imm := (!e.compiling && e.immediate > 0)
 
 	if imm {
 
-		// In immediate mode we just setup a bogus
-		// word-name, which can never be legal.
+		// In immediate mode we are going to compile
+		// a word which has an illegal-name, which ensures
+		// we never overwrite a valid user-word
 		//
 		// We'll then execute it immediately post-definition.
 		e.tmp.Name = "$ $"
 	}
 
-	// If we don't have a name
+	// If we don't yet have a name
 	if e.tmp.Name == "" {
 
 		// is the name used?  If so remove it
@@ -231,7 +258,7 @@ func (e *Eval) compileToken(tok string) error {
 			e.Dictionary[idx].Name = ""
 		}
 
-		// save the name
+		// Set the name for this word.
 		e.tmp.Name = tok
 		return nil
 	}
@@ -255,7 +282,7 @@ func (e *Eval) compileToken(tok string) error {
 		return nil
 	}
 
-	// Is the user adding an existing word?
+	// Is the user adding an existing word to the definition?
 	idx := e.findWord(tok)
 	if idx >= 0 {
 
@@ -267,6 +294,7 @@ func (e *Eval) compileToken(tok string) error {
 		//
 		// Horrid
 		//
+
 		// If the word was a "DO"
 		if tok == "do" {
 			e.doOpen = len(e.tmp.Words) - 1
@@ -278,6 +306,13 @@ func (e *Eval) compileToken(tok string) error {
 			// offset of do must be present
 			e.tmp.Words = append(e.tmp.Words, -2)
 			e.tmp.Words = append(e.tmp.Words, float64(e.doOpen))
+		}
+
+		// output a string, in compiled form
+		if token.Name == ".\"" {
+			e.strings = append(e.strings, token.Value)
+			e.tmp.Words = append(e.tmp.Words, -5)
+			e.tmp.Words = append(e.tmp.Words, float64(len(e.strings))-1)
 		}
 
 		//
@@ -420,6 +455,9 @@ func (e *Eval) compileToken(tok string) error {
 //
 //    "-4" is an unconditional jump, which will change our IP
 //
+//    "-5" prints a string, stored in our literal-area.
+//         Dynamic strings are not supported.
+//
 func (e *Eval) evalWord(index int) error {
 
 	// Lookup the word in our dictionary.
@@ -475,10 +513,16 @@ func (e *Eval) evalWord(index int) error {
 			e.Stack.Push(opcode)
 
 			state = "default"
-
+		} else if state == "string-print" {
+			// print a string
+			e.printString(e.strings[int(opcode)])
+			state = "default"
 		} else if state == "loop-jump" {
+
 			// If the two top-most entries
 			// are not equal, then jump
+			//
+			// TODO: This is horrid
 			cur, ee := e.Stack.Pop()
 			if ee != nil {
 				return ee
@@ -528,6 +572,7 @@ func (e *Eval) evalWord(index int) error {
 			}
 			state = "default"
 		} else if state == "jump" {
+
 			// change opcode
 			ip = int(opcode)
 			// decrement as it'll get bumped at
@@ -546,6 +591,8 @@ func (e *Eval) evalWord(index int) error {
 				state = "cond-jump"
 			case -4:
 				state = "jump"
+			case -5:
+				state = "string-print"
 			default:
 				err := e.evalWord(int(opcode))
 				if err != nil {
@@ -577,14 +624,22 @@ func (e *Eval) findWord(name string) int {
 // dumpWord dumps the definition of the given word.
 func (e *Eval) dumpWord(idx int) {
 
+	// Lookup the word
 	word := e.Dictionary[idx]
 
+	// Store temporary data here
 	codes := []string{}
 
-	// Show the names of the codes, as well as their indexes
+	// Walk over the opcodes in the word-definition
 	off := 0
 	for off < len(word.Words) {
 
+		// Get the actual byte
+		//
+		// Values >=0 are references to other words.
+		//
+		// Values <0 are "magic", and were created via
+		// the "compilation" process.
 		v := word.Words[int(off)]
 
 		if v == -1 {
@@ -599,17 +654,32 @@ func (e *Eval) dumpWord(idx int) {
 		} else if v == -4 {
 			codes = append(codes, fmt.Sprintf("%d: [jmp %f]", off, word.Words[off+1]))
 			off++
+		} else if v == -5 {
+			codes = append(codes, fmt.Sprintf("%d: [print-string %f (\"%s\")]", off, word.Words[off+1], e.strings[int(word.Words[off+1])]))
+			off++
 		} else {
 			codes = append(codes, fmt.Sprintf("%d: %s", off, e.Dictionary[int(v)].Name))
 		}
+
+		// keep going for further words
 		off++
 	}
 
 	// Didn't decompile?  Then it was a native-word
 	if len(codes) == 0 {
-		fmt.Printf("Word '%s' - native\n", word.Name)
+		fmt.Printf("Word '%s' - [Native]\n", word.Name)
 	} else {
 		// Otherwise show the bytecode.
 		fmt.Printf("Word '%s'\n %s\n", word.Name, strings.Join(codes, "\n "))
 	}
+}
+
+// printString outputs a string - replacing "\n", etc, with the
+// real codes.
+func (e *Eval) printString(str string) {
+
+	str = strings.ReplaceAll(str, "\\n", "\n")
+	str = strings.ReplaceAll(str, "\\t", "\t")
+	str = strings.ReplaceAll(str, "\\r", "\r")
+	fmt.Printf("%s", str)
 }
