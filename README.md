@@ -6,8 +6,10 @@
     * [Part 4](#part-4) - Allow defining improved words via the REPL.
     * [Part 5](#part-5) - Allow executing loops via `do`/`loop`.
     * [Part 6](#part-6) - Allow conditional execution via `if`/`then`.
-  * [TODO](#todo)
+    * [Final Revision](#final-revision) - Idiomatic Go, test-cases, and many new words
   * [BUGS](#bugs)
+    * [loops](#loops) - zero expected-iterations actually runs once
+  * [Github Setup](#github-setup)
 
 
 # foth
@@ -19,29 +21,38 @@ If you're new to FORTH then the following wikipedia page is a good starting poin
 
 * [Forth](https://en.wikipedia.org/wiki/Forth_(programming_language))
 
-This repository was implemented based upon the following Hacker News comment:
+This repository was created by following the brief tutorial posted within the following Hacker News thread:
 
 * https://news.ycombinator.com/item?id=13082825
 
-The feature-set is pretty minimal:
+The end-result of this work is a simple scripting-language which you could easily embed within your golang application, allowing users to write simple FORTH-like scripts.  We have the kind of features you would expect from a minimal system:
 
 * Reverse-Polish mathematical operations.
-* Support for floating-point numbers (anything that will fit in a float64).
+* Comments between `(` and `)` are ignored, as expected.
+  * Single-line comments `\` to the end of the line are also supported.
+* Support for floating-point numbers (anything that will fit inside a `float64`).
 * Support for printing the top-most stack element (`.`, or `print`).
 * Support for outputting ASCII characters (`emit`).
+* Support for outputting strings (`." Hello, World "`).
+* Support for basic stack operatoins (`dup`, `swap`, `drop`)
 * Support for loops, via `do`/`loop`.
-* Support for conditional-execution, via `if`/`then`.
+* Support for conditional-execution, via `if`, `else`, and `then`.
+* Load any files specified on the command-line
+  * If no arguments are included run the REPL
+* A standard library is loaded, from the present directory, if it is present.
+  * See what we load by default in [foth/foth.4th](foth/foth.4th).
 
-The code evolves through a series of steps, guided by the comment-linked, ultimately we hope to end up with a featurefull final revision which is actually somewhat useable, and which could be embedded in a host application to easily support user-scripting.
+The code evolves through a series of simple steps, guided by the comment-linked, ultimately ending with a featurefull [final revision](#final-revision) which is actually usable.
 
-While you could improve things further from this final step I'm going to stop there, because I think I've done enough for the moment.  If you did want to extend further then there _are_ some obvious things to add:
+While it would be possible to further improve the implementation from the final stage I'm going to stop there, because I think I've done enough for the moment.
 
-* Support for strings.
-* Support for comments.
+If you did want to extend further then there _are_ some obvious things to add:
+
 * Adding more of the "standard" FORTH-words.
 * Case-insensitive lookup of words.
   * e.g. "dup" should act the same way as "DUP".
-
+* Pull-requests to add additional functionality to the [final revision](#final-revision) are most welcome.
+* Simplify the special-cases of string-support, along with the conditional/loop handling.
 
 
 ## Implementation Overview
@@ -212,7 +223,7 @@ See [part6/](part6/) for the code.
 
 **NOTE**: The `if` handler allows:
 
-   : foo $COND IF word1 [word2 .. wordN] then [more_word1 more_word2 ..] ;
+    : foo $COND IF word1 [word2 .. wordN] then [more_word1 more_word2 ..] ;
 
 This means if the condition is true then we run `word1`, `word2` .. and otherwise we skip them, and continue running after the `then` statement.  Specifically note there is **no support for `else`**.  That is why we call the `test_host` and `test_cold` words in our `test` definition.  Each word tests separately.
 
@@ -248,7 +259,41 @@ I found this page useful, it also documents `invert` which I added for completen
 
 
 
+### Final Revision
+
+The final version, stored beneath [foth/](foth/), is pretty similar to the previous part, however there have been a lot of changes behind the scenes:
+
+* We've added a large number of test cases, with a good amount of test-coverage.
+* We use a simple [lexer/](lexer/) to tokenize our input
+  * This was required to allow us to ignore comments, and handle string literals.
+  * Merely splitting on whitespace characters would have left either of those impossible.
+* The `if` handling has been updated to support an `else`-branch, the general form is now:
+  * `$COND IF word1 [ .. wordN ] else alt_word1 [.. altN] then [more_word1 more_word2 ..]`
+* It is now possible to use `if`, `else`, `then`, `do`, and `loop` outside word-definitions.
+  * i.e. Immediately.
+* There were many new words defined:
+  * `debug` to change the debug-flag.
+  * `debug?` to reveal the status.
+  * `dump` dump the compiled form of the given word
+    * You can view all the definitions with something like this:
+    * `#words 0 do dup dump loop`
+  * `#words` to return the number of defined words.
+* Removed all calls to `os.Exit()`
+  * We return `error` objects where appropriate, allowing the caller to detect problems.
+* Make redefining existing words possible.
+  * Note that due to our implementation previously defined words remain unchanged, even if a word is replaced/updated.
+* Load any files specified on the command line.
+  * If no files are specified run the REPL.
+
+See [foth/](foth/) for the implementation.
+
+
+
 ## BUGS
+
+There are two known-issues at the moment:
+
+### Loops
 
 The handling of loops isn't correct when there should be zero-iterations:
 
@@ -264,4 +309,11 @@ The handling of loops isn't correct when there should be zero-iterations:
      ^D
 ```
 
-Should test in the `do` maybe?  Before the first iteration?
+In our `stars` definition we handle this by explicitly testing the loop
+value before we proceed - At the moment any loop of `0 0` will run once
+so you'll need to add that test if we can't fix this for the general case.
+
+
+# Github Setup
+
+This repository is configured to run tests upon every commit, and when pull-requests are created/updated.  The testing is carried out via [.github/run-tests.sh](.github/run-tests.sh) which is used by the [github-action-tester](https://github.com/skx/github-action-tester) action.

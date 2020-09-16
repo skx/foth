@@ -66,7 +66,7 @@ func (e *Eval) loop() {
 	cur := e.Stack.Pop()
 	max := e.Stack.Pop()
 
-	cur += 1
+	cur++
 
 	e.Stack.Push(max)
 	e.Stack.Push(cur)
