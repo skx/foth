@@ -318,8 +318,7 @@ so you'll need to add that test if we can't fix this for the general case.
 
 # See Also
 
-This repository was put together after [experimenting with a scripting language](https://github.com/skx/monkey/), an [evaluation engine](https://github.com/skx/
-evalfilter/), and writing a [BASIC interpreter](https://github.com/skx/gobasic).
+This repository was put together after [experimenting with a scripting language](https://github.com/skx/monkey/), an [evaluation engine](https://github.com/skx/evalfilter/), and writing a [BASIC interpreter](https://github.com/skx/gobasic).
 
 I've also played around with a couple of compilers which might be interesting to refer to:
 
