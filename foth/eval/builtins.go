@@ -256,6 +256,22 @@ func (e *Eval) mul() error {
 func (e *Eval) nop() error {
 	return nil
 }
+
+func (e *Eval) over() error {
+	a, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	b, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+
+	e.Stack.Push(b)
+	e.Stack.Push(a)
+	e.Stack.Push(b)
+	return nil
+}
 func (e *Eval) print() error {
 	a, err := e.Stack.Pop()
 	if err != nil {
