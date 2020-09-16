@@ -560,6 +560,61 @@ func TestNop(t *testing.T) {
 	}
 }
 
+func TestOver(t *testing.T) {
+
+	e := New()
+
+	// empty stack
+	err := e.over()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// int
+	e.Stack.Push(3)
+	err = e.over()
+	if err == nil {
+		t.Fatalf("expected underflow")
+	}
+
+	// OK now we add 2 1
+	e.Stack.Push(2)
+	e.Stack.Push(1)
+	err = e.over()
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	// stack should now be: 2 1 2
+	v, er := e.Stack.Pop()
+	if er != nil {
+		t.Fatalf("unexpected error")
+	}
+	if v != 2 {
+		t.Fatalf("unexpected error")
+	}
+
+	v, er = e.Stack.Pop()
+	if er != nil {
+		t.Fatalf("unexpected error")
+	}
+	if v != 1 {
+		t.Fatalf("unexpected error")
+	}
+
+	v, er = e.Stack.Pop()
+	if er != nil {
+		t.Fatalf("unexpected error")
+	}
+	if v != 2 {
+		t.Fatalf("unexpected error")
+	}
+
+	if !e.Stack.IsEmpty() {
+		t.Fatalf("unexpected stack content")
+	}
+
+}
 func TestPrint(t *testing.T) {
 	e := New()
 
