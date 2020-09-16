@@ -13,20 +13,25 @@ import (
 	"strings"
 )
 
-func (e *Eval) add() error {
-	var a, b float64
-	var err error
+func (e *Eval) binOp(op func(float64, float64) float64) func() error {
+	return func() error {
+		a, err := e.Stack.Pop()
+		if err != nil {
+			return err
+		}
 
-	a, err = e.Stack.Pop()
-	if err != nil {
-		return err
+		b, err := e.Stack.Pop()
+		if err != nil {
+			return err
+		}
+
+		e.Stack.Push(op(a, b))
+		return nil
 	}
-	b, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	e.Stack.Push(a + b)
-	return nil
+}
+
+func (e *Eval) add() error {
+	return e.binOp(func(n float64, m float64) float64 { return n + m })()
 }
 
 func (e *Eval) debugSet() error {
@@ -54,20 +59,7 @@ func (e *Eval) debugp() error {
 }
 
 func (e *Eval) div() error {
-	var a, b float64
-	var err error
-
-	a, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	b, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-
-	e.Stack.Push(b / a)
-	return nil
+	return e.binOp(func(n float64, m float64) float64 { return m / n })()
 }
 
 func (e *Eval) drop() error {
@@ -106,60 +98,30 @@ func (e *Eval) emit() error {
 }
 
 func (e *Eval) eq() error {
-	var a, b float64
-	var err error
-	a, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	b, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	if a == b {
-		e.Stack.Push(1)
-	} else {
-		e.Stack.Push(0)
-	}
-	return nil
+	return e.binOp(func(n float64, m float64) float64 {
+		if m == n {
+			return 1
+		}
+		return 0
+	})()
 }
 
 func (e *Eval) gt() error {
-	var a, b float64
-	var err error
-	b, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	a, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	if a > b {
-		e.Stack.Push(1)
-	} else {
-		e.Stack.Push(0)
-	}
-	return nil
+	return e.binOp(func(n float64, m float64) float64 {
+		if m > n {
+			return 1
+		}
+		return 0
+	})()
 }
 
 func (e *Eval) gtEq() error {
-	var a, b float64
-	var err error
-	b, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	a, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	if a >= b {
-		e.Stack.Push(1)
-	} else {
-		e.Stack.Push(0)
-	}
-	return nil
+	return e.binOp(func(n float64, m float64) float64 {
+		if m >= n {
+			return 1
+		}
+		return 0
+	})()
 }
 
 func (e *Eval) invert() error {
@@ -197,60 +159,25 @@ func (e *Eval) loop() error {
 }
 
 func (e *Eval) lt() error {
-	var a, b float64
-	var err error
-	b, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	a, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-
-	if a < b {
-		e.Stack.Push(1)
-	} else {
-		e.Stack.Push(0)
-	}
-
-	return nil
+	return e.binOp(func(n float64, m float64) float64 {
+		if m < n {
+			return 1
+		}
+		return 0
+	})()
 }
 
 func (e *Eval) ltEq() error {
-	var a, b float64
-	var err error
-	b, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	a, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-
-	if a <= b {
-		e.Stack.Push(1)
-	} else {
-		e.Stack.Push(0)
-	}
-
-	return nil
+	return e.binOp(func(n float64, m float64) float64 {
+		if m <= n {
+			return 1
+		}
+		return 0
+	})()
 }
 
 func (e *Eval) mul() error {
-	var a, b float64
-	var err error
-	b, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	a, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	e.Stack.Push(a * b)
-	return nil
+	return e.binOp(func(n float64, m float64) float64 { return m * n })()
 }
 
 func (e *Eval) nop() error {
@@ -309,18 +236,7 @@ func (e *Eval) startDefinition() error {
 }
 
 func (e *Eval) sub() error {
-	var a, b float64
-	var err error
-	b, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	a, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	e.Stack.Push(a - b)
-	return nil
+	return e.binOp(func(n float64, m float64) float64 { return m - n })()
 }
 
 func (e *Eval) swap() error {
