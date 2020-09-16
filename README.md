@@ -6,7 +6,7 @@
     * [Part 4](#part-4) - Allow defining improved words via the REPL.
     * [Part 5](#part-5) - Allow executing loops via `do`/`loop`.
     * [Part 6](#part-6) - Allow conditional execution via `if`/`then`.
-    * [Final Revision](#final-revision) - Idiomatic Go, test-cases, and the support for `if`/`else`/`then`.
+    * [Final Revision](#final-revision) - Idiomatic Go, test-cases, and many new words
   * [BUGS](#bugs)
     * [loops](#loops) - zero expected-iterations actually runs once
   * [Github Setup](#github-setup)
@@ -28,9 +28,12 @@ This repository was created by following the brief tutorial posted within the fo
 The end-result of this work is a simple scripting-language which you could easily embed within your golang application, allowing users to write simple FORTH-like scripts.  We have the kind of features you would expect from a minimal system:
 
 * Reverse-Polish mathematical operations.
+* Comments between `(` and `)` are ignored, as expected.
+  * Single-line comments `\` to the end of the line are also supported.
 * Support for floating-point numbers (anything that will fit inside a `float64`).
 * Support for printing the top-most stack element (`.`, or `print`).
 * Support for outputting ASCII characters (`emit`).
+* Support for outputting strings (`." Hello, World "`).
 * Support for basic stack operatoins (`dup`, `swap`, `drop`)
 * Support for loops, via `do`/`loop`.
 * Support for conditional-execution, via `if`, `else`, and `then`.
@@ -39,19 +42,17 @@ The end-result of this work is a simple scripting-language which you could easil
 * A standard library is loaded, from the present directory, if it is present.
   * See what we load by default in [foth/foth.4th](foth/foth.4th).
 
-The code evolves through a series of simple steps, guided by the comment-linked, ultimately ending with a featurefull [final revision](#final-revision) which is actually useable.
+The code evolves through a series of simple steps, guided by the comment-linked, ultimately ending with a featurefull [final revision](#final-revision) which is actually usable.
 
 While it would be possible to further improve the implementation from the final stage I'm going to stop there, because I think I've done enough for the moment.
 
 If you did want to extend further then there _are_ some obvious things to add:
 
-* Support for strings.
-* Support for comments.
 * Adding more of the "standard" FORTH-words.
 * Case-insensitive lookup of words.
   * e.g. "dup" should act the same way as "DUP".
 * Pull-requests to add additional functionality to the [final revision](#final-revision) are most welcome.
-* Allow `do`/`loop` and `if`/`else`/`next` to work outside compiled functions.
+* Simplify the special-cases of string-support, along with the conditional/loop handling.
 
 
 ## Implementation Overview
@@ -260,23 +261,24 @@ I found this page useful, it also documents `invert` which I added for completen
 
 ### Final Revision
 
-The final version, stored beneath [foth/](foth/), is largely identical to the previous part, in the sense that there are no significant new additions to the interpreter, or the predefined list of words.
+The final version, stored beneath [foth/](foth/), is pretty similar to the previous part, however there have been a lot of changes behind the scenes:
 
-However the `if` handling has been updated to support an `else`-branch, the general form is now:
-
-    $COND IF word1 [ .. wordN ] else alt_word1 [.. altN] then [more_word1 more_word2 ..]
-
-It is also now possible to use `if`, `else`, `then`, `do`, and `loop` outside word-definitions.  (i.e. Immediately.)
-
-There are two new words `debug` to change the debug-flag, and `debug?` to reveal the status - but these are not hugely significant.
-
-The aim of the final-version was to add test-cases, ensure that the code is more idiomatic, etc.
-
-Changes here:
-
-* Added debug output if ${DEBUG} is non-empty.
-* Added test-cases.
-* Removed all uses of `os.Exit()`.
+* We've added a large number of test cases, with a good amount of test-coverage.
+* We use a simple [lexer/](lexer/) to tokenize our input
+  * This was required to allow us to ignore comments, and handle string literals.
+  * Merely splitting on whitespace characters would have left either of those impossible.
+* The `if` handling has been updated to support an `else`-branch, the general form is now:
+  * `$COND IF word1 [ .. wordN ] else alt_word1 [.. altN] then [more_word1 more_word2 ..]`
+* It is now possible to use `if`, `else`, `then`, `do`, and `loop` outside word-definitions.
+  * i.e. Immediately.
+* There were many new words defined:
+  * `debug` to change the debug-flag.
+  * `debug?` to reveal the status.
+  * `dump` dump the compiled form of the given word
+    * You can view all the definitions with something like this:
+    * `#words 0 do dup dump loop`
+  * `#words` to return the number of defined words.
+* Removed all calls to `os.Exit()`
   * We return `error` objects where appropriate, allowing the caller to detect problems.
 * Make redefining existing words possible.
   * Note that due to our implementation previously defined words remain unchanged, even if a word is replaced/updated.
