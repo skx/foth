@@ -69,8 +69,8 @@ func TestDiv(t *testing.T) {
 func TestDo(t *testing.T) {
 
 	e := New()
-	if e.do() == nil {
-		t.Fatalf("expected error, got none")
+	if e.do() != nil {
+		t.Fatalf("unexpected error")
 	}
 }
 
@@ -304,8 +304,8 @@ func TestInvert(t *testing.T) {
 func TestIff(t *testing.T) {
 
 	e := New()
-	if e.iff() == nil {
-		t.Fatalf("expected error, got none")
+	if e.iff() != nil {
+		t.Fatalf("unexpected error")
 	}
 }
 
@@ -581,8 +581,8 @@ func TestSwap(t *testing.T) {
 func TestThen(t *testing.T) {
 
 	e := New()
-	if e.then() == nil {
-		t.Fatalf("expected error, got none")
+	if e.then() != nil {
+		t.Fatalf("unexpected error")
 	}
 }
 

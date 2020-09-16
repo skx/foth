@@ -30,6 +30,12 @@ type Word struct {
 	// NOTE: We specifically store `float64` here so that we can add
 	// floats to the stack when compiling.
 	Words []float64
+
+	// Does this word switch us into immediate-mode?
+	StartImmediate bool
+
+	// Does this word end us from immediate-mode?
+	EndImmediate bool
 }
 
 // Eval is our evaluation structure
@@ -46,6 +52,9 @@ type Eval struct {
 
 	// Are we in debug-mode?
 	debug bool
+
+	// Are we in immediate-mode?
+	immediate int
 
 	// Temporary word we're compiling
 	tmp Word
@@ -87,17 +96,17 @@ func New() *Eval {
 		Word{Name: "==", Function: e.eq},
 		Word{Name: ">", Function: e.gt},
 		Word{Name: ">=", Function: e.gtEq},
-		Word{Name: "do", Function: e.do},
+		Word{Name: "do", Function: e.do, StartImmediate: true},
 		Word{Name: "drop", Function: e.drop},
 		Word{Name: "dup", Function: e.dup},
 		Word{Name: "else", Function: e.elsee},
 		Word{Name: "emit", Function: e.emit},
-		Word{Name: "if", Function: e.iff},
+		Word{Name: "if", Function: e.iff, StartImmediate: true},
 		Word{Name: "invert", Function: e.invert},
-		Word{Name: "loop", Function: e.loop},
+		Word{Name: "loop", Function: e.loop, EndImmediate: true},
 		Word{Name: "print", Function: e.print},
 		Word{Name: "swap", Function: e.swap},
-		Word{Name: "then", Function: e.then},
+		Word{Name: "then", Function: e.then, EndImmediate: true},
 		Word{Name: "words", Function: e.words},
 	}
 
@@ -119,7 +128,7 @@ func (e *Eval) Eval(args []string) error {
 		}
 
 		// Are we in compiling mode?
-		if e.compiling {
+		if e.compiling || (e.immediate > 0) {
 
 			// If so compile the token
 			err := e.compileToken(tok)
@@ -131,25 +140,32 @@ func (e *Eval) Eval(args []string) error {
 			continue
 		}
 
-		// Did we handle this as a dictionary item?
-		handled := false
-		for index, word := range e.Dictionary {
+		// Lookup this word from our dictionary
+		idx := e.findWord(tok)
+		if idx != -1 {
 
-			if tok == word.Name {
-				handled = true
-				err := e.evalWord(index)
+			// Are we starting immediate mode?
+			if e.compiling == false && e.Dictionary[idx].StartImmediate {
+				e.immediate++
+
+				err := e.compileToken(tok)
+				if err != nil {
+					return err
+				}
+			} else {
+
+				err := e.evalWord(idx)
 				if err != nil {
 					return err
 				}
 			}
-		}
+		} else {
 
-		// If we didn't handle this as a word, then
-		// assume it is a number.
-		if !handled {
+			// If we didn't handle this as a word, then
+			// assume it is a number.
 			i, err := strconv.ParseFloat(tok, 64)
 			if err != nil {
-				return fmt.Errorf("failed to convert %s to number %s", tok, err.Error())
+				return fmt.Errorf("11 failed to convert %s to number %s", tok, err.Error())
 			}
 
 			e.Stack.Push(i)
@@ -162,6 +178,19 @@ func (e *Eval) Eval(args []string) error {
 // compileToken is called with a new token, when we're in compiling-mode.
 func (e *Eval) compileToken(tok string) error {
 
+	fmt.Printf("compileToken(%s)\n", tok)
+
+	// Did we start in immediate-mode?
+	imm := (e.compiling == false && e.immediate > 0)
+
+	if imm {
+
+		// In immediate mode we just setup a bogus
+		// word which we then execute.
+		e.tmp.Name = "$ $"
+		fmt.Printf("compileToken '%s' in immediate mode\n", tok)
+	}
+
 	// If we don't have a name
 	if e.tmp.Name == "" {
 
@@ -173,9 +202,8 @@ func (e *Eval) compileToken(tok string) error {
 			e.Dictionary[idx].Name = ""
 		}
 
-		// save the name
+		// save the name - if we didn't just fake it.
 		e.tmp.Name = tok
-
 		return nil
 	}
 
@@ -285,11 +313,40 @@ func (e *Eval) compileToken(tok string) error {
 		}
 
 		if tok == "then" {
+
 			// back - patch the jump offset to the position of this word
 			if e.ifOffset2 > 0 {
 				e.tmp.Words[e.ifOffset2-1] = float64(len(e.tmp.Words))
 			} else {
 				e.tmp.Words[e.ifOffset1-1] = float64(len(e.tmp.Words) - 1)
+			}
+			// Reset for future
+			e.ifOffset2 = 0
+			e.ifOffset1 = 0
+		}
+
+		// Did we just end immediate mode?
+		if e.Dictionary[idx].EndImmediate {
+
+			// If we're inside an immediate
+			if e.compiling == false && e.immediate > 0 {
+				e.immediate--
+			}
+
+			if e.immediate == 0 && imm {
+
+				fmt.Printf("We've completed the temporary word!\n")
+				// We've compiled the word.
+				e.Dictionary = append(e.Dictionary, e.tmp)
+
+				e.dumpWords()
+
+				// reset for the next definition
+				e.tmp.Name = ""
+				e.tmp.Words = []float64{}
+				// Run it.
+				e.evalWord(len(e.Dictionary) - 1)
+				return nil
 			}
 		}
 
@@ -304,7 +361,7 @@ func (e *Eval) compileToken(tok string) error {
 	// Convert to float
 	val, err := strconv.ParseFloat(tok, 64)
 	if err != nil {
-		return fmt.Errorf("failed to convert %s to number %s", tok, err.Error())
+		return fmt.Errorf("22 failed to convert %s to number %s", tok, err.Error())
 	}
 	e.tmp.Words = append(e.tmp.Words, val)
 
@@ -340,9 +397,6 @@ func (e *Eval) evalWord(index int) error {
 	// Is this implemented in golang?  If so just invoke the function
 	// and we're done.
 	if word.Function != nil {
-		if word.Name == "if" || word.Name == "else" || word.Name == "then" {
-			return nil
-		}
 
 		if e.debug {
 			fmt.Printf(" calling %s\n", word.Name)
