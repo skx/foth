@@ -41,6 +41,9 @@ func doInit(eval *eval.Eval, path string) error {
 		err = eval.Eval(line)
 		if err != nil {
 			fmt.Printf("ERROR: %s\n", err.Error())
+
+			// Reset our state, to allow recovery
+			eval.Reset()
 		}
 
 		// Repeat
@@ -103,6 +106,9 @@ func main() {
 		if err != nil {
 			fmt.Printf("ERROR: %s\n", err.Error())
 		}
+
+		// Reset our state, to allow recovery
+		forth.Reset()
 
 	}
 }

@@ -156,6 +156,38 @@ func TestIfThenElse(t *testing.T) {
 	}
 }
 
+func TestReset(t *testing.T) {
+
+	// create instance
+	e := New()
+	e.debug = true
+
+	// Trigger error-state
+	err := e.Eval(": foo 1 3 + .;")
+	if err == nil {
+		t.Fatalf("expected an error, got none")
+	}
+
+	// Now reset and run something else to confirm it worked
+	e.Reset()
+
+	err = e.Eval(": foo 1 3 + ; foo ")
+	if err != nil {
+		t.Fatalf("expected no error, got %s", err.Error())
+	}
+
+	ret, err2 := e.Stack.Pop()
+	if err2 != nil {
+		t.Fatalf("failed to get stack value")
+	}
+	if !e.Stack.IsEmpty() {
+		t.Fatalf("expected stack to be empty, it wasn't")
+	}
+	if ret != 4 {
+		t.Fatalf("unexpected result, post-recovery")
+	}
+}
+
 func TestVariables(t *testing.T) {
 
 	// create instance
@@ -231,4 +263,3 @@ func TestVariables(t *testing.T) {
 		t.Fatalf("variable has wrong value")
 	}
 }
-
