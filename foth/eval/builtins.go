@@ -93,7 +93,7 @@ func (e *Eval) emit() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%c", rune(a))
+	e.printString(string(rune(a)))
 	return nil
 }
 
@@ -219,7 +219,7 @@ func (e *Eval) print() error {
 	// If the value on the top of the stack is an integer
 	// then show it as one - i.e. without any ".00000".
 	if float64(int(a)) == a {
-		fmt.Printf("%d\n", int(a))
+		e.printString(fmt.Sprintf("%d\n", int(a)))
 		return nil
 	}
 
@@ -234,7 +234,7 @@ func (e *Eval) print() error {
 	for strings.HasSuffix(output, "0") {
 		output = strings.TrimSuffix(output, "0")
 	}
-	fmt.Printf("%s\n", output)
+	e.printString(fmt.Sprintf("%s\n", output))
 	return nil
 }
 

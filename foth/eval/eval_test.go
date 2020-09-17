@@ -1,6 +1,8 @@
 package eval
 
 import (
+	"bufio"
+	"bytes"
 	"os"
 	"strings"
 	"testing"
@@ -168,8 +170,16 @@ func TestReset(t *testing.T) {
 		t.Fatalf("expected an error, got none")
 	}
 
+	// Ensure something is on the stack
+	e.Stack.Push(33.1)
+
 	// Now reset and run something else to confirm it worked
 	e.Reset()
+
+	// The stack should be empty
+	if !e.Stack.IsEmpty() {
+		t.Fatalf("expected stack to be empty, it wasn't")
+	}
 
 	err = e.Eval(": foo 1 3 + ; foo ")
 	if err != nil {
@@ -261,5 +271,47 @@ func TestVariables(t *testing.T) {
 	}
 	if v != 6 {
 		t.Fatalf("variable has wrong value")
+	}
+}
+
+func TestSetWriter(t *testing.T) {
+
+	var b bytes.Buffer
+	out := bufio.NewWriter(&b)
+
+	e := New()
+	e.debug = true
+	e.SetWriter(out)
+
+	// write something simple
+	err := e.Eval("42 emit 42 emit")
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	if b.String() != "**" {
+		t.Fatalf("STDOUT didn't match")
+	}
+
+	// write something more complex
+	b.Reset()
+	err = e.Eval("10 0 do dup 48 + emit loop")
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	if b.String() != "0123456789" {
+		t.Fatalf("STDOUT didn't match, got '%s'", b.String())
+	}
+
+	// Finally a string literal
+	b.Reset()
+	err = e.Eval(".\" Steve\nKemp \"")
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	if b.String() != "Steve\nKemp" {
+		t.Fatalf("STDOUT didn't match, got '%s'", b.String())
 	}
 }
