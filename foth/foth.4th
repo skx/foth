@@ -1,11 +1,70 @@
 \
 \ This file is loaded on-startup, if it is present.
 \
-\ NOTE: Lines having a "\"-prefix will be skipped.
+\ In FORTH there are two kinds of comments:
 \
-\       This is not a standard approach to FORTH comments, but it makes
-\       sense for this particular implementation.
+\  1. Anything between \ and a newline will be skipped.
 \
+\  2. Anything between brackets `(` + `)` will be skipped.
+\     These comments can span lines, although they typically do not.
+\
+\  NOTE: Nesting `(` and `)` comments is a syntax error, so the following
+\        is explicitly denied:
+\
+\        ( comment ( comment again ) )
+\
+\        This is only supported here because we process single-line
+\        comments before the other kind of comments.
+
+
+\
+\ Declare a variable named `PI`
+\
+variable PI
+
+\
+\ Set the value of PI to be the expected constant.
+\
+\ The following web-reference is useful reading for variable-access, even
+\ though our support is slightly different:
+\
+\  https://www.forth.com/starting-forth/8-variables-constants-arrays/
+\
+3.14 PI !
+
+\
+\ Variables can be retrieved, and displayed, like so:
+\
+\    PI @ .
+
+
+\
+\ Of course you can modify them inside words.
+\
+\ The following example sets a variable "val", and allows showing/incrementing
+\ it
+\
+variable val
+
+\
+\ A simple helper to get the content of a variable and show it.
+\
+: ?  @ . ;
+
+\
+\ Get the value of the variable named "val", and show it
+\
+: show_val val ? ;
+
+\
+\ Get the value, increase by one, and store it back
+\
+: inc_val val @ 1 + val ! ;
+
+\
+\ Get the value, decrement, and store.
+\
+: dec_val val @ 1 - val ! ;
 
 
 \
