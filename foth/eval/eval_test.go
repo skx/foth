@@ -58,6 +58,16 @@ func TestDumpWords(t *testing.T) {
 	e.dumpWord(0)
 	os.Setenv("DEBUG", "")
 }
+func TestError(t *testing.T) {
+
+	e := New()
+	e.debug = true
+
+	err := e.Eval(": foo . ; foo ")
+	if err == nil {
+		t.Fatalf("expected error, got none")
+	}
+}
 
 // Try running one of each of our test-cases
 func TestEvalWord(t *testing.T) {

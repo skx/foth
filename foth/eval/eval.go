@@ -237,10 +237,12 @@ func (e *Eval) Eval(input string) error {
 			if !e.compiling && e.Dictionary[idx].StartImmediate {
 				e.immediate++
 
-				err := e.compileToken(token)
-				if err != nil {
-					return err
-				}
+				// Errors here can't happen.
+				//
+				// We only compile at the start
+				// of conditionals, and they can't
+				// happen.
+				e.compileToken(token)
 			} else {
 
 				err := e.evalWord(idx)
