@@ -22,6 +22,10 @@ If you're new to FORTH then the following wikipedia page is a good starting poin
 
 * [Forth](https://en.wikipedia.org/wiki/Forth_(programming_language))
 
+In brief FORTH is a stack-based language, which uses Reverse Polish notation.   The basic _thing_ in Forth is the "word", which is a named data item, subroutine, or operator.
+
+Programming in Forth consists largely of defining new words, which are stored in a so-called "dictionary", in terms of existing ones.
+
 This repository was created by following the brief tutorial posted within the following Hacker News thread:
 
 * https://news.ycombinator.com/item?id=13082825
@@ -42,6 +46,21 @@ The end-result of this work is a simple scripting-language which you could easil
   * If no arguments are included run the REPL
 * A standard library is loaded, from the present directory, if it is present.
   * See what we load by default in [foth/foth.4th](foth/foth.4th).
+
+The obvious omission from this implementation is support for variables, and strings in the general case.  For example in real FORTH you can set a variable "today" to be "3" with:
+
+     > VARIABLE today
+     > 3 today !
+
+Then access that variable with:
+
+     > today @
+
+Usually you'd see a helper `: ?   @ . ;` which would allow:
+
+     > today ?
+     3
+
 
 The code evolves through a series of simple steps, guided by the comment-linked, ultimately ending with a featurefull [final revision](#final-revision) which is actually usable.
 
