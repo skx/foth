@@ -152,7 +152,8 @@ func New() *Eval {
 
 // Eval evaluates the given expression.
 //
-// This is invoked by our repl with a line of input at the time.
+// This is the main public-facing the user of this library would be expected
+// to use.
 func (e *Eval) Eval(input string) error {
 
 	// Lex our input string into a series of tokens.
@@ -253,6 +254,36 @@ func (e *Eval) Eval(input string) error {
 	}
 
 	return nil
+}
+
+// GetVariable returns the contents of the specified variable.
+//
+// This is designed to be used by host-applications which embed
+// this library.
+func (e *Eval) GetVariable(name string) (float64, error) {
+
+	idx := e.findVariable(name)
+	if idx >= 0 {
+		return e.vars[idx].Value, nil
+	}
+
+	return 0, fmt.Errorf("variable %s not found", name)
+}
+
+// SetVariable stores the specified value in the variable of the given
+// name.
+//
+// This is designed to be used by host-applications which embed
+// this library.
+func (e *Eval) SetVariable(name string, value float64) {
+
+	idx := e.findVariable(name)
+	if idx >= 0 {
+		e.vars[idx].Value = value
+		return
+	}
+
+	e.vars = append(e.vars, Variable{Name: name, Value: value})
 }
 
 // compileToken is called with a new token, when we're in compiling-mode.
@@ -481,6 +512,59 @@ func (e *Eval) compileToken(token lexer.Token) error {
 	return nil
 }
 
+// dumpWord dumps the definition of the given word.
+func (e *Eval) dumpWord(idx int) {
+
+	// Lookup the word
+	word := e.Dictionary[idx]
+
+	// Store temporary data here
+	codes := []string{}
+
+	// Walk over the opcodes in the word-definition
+	off := 0
+	for off < len(word.Words) {
+
+		// Get the actual byte
+		//
+		// Values >=0 are references to other words.
+		//
+		// Values <0 are "magic", and were created via
+		// the "compilation" process.
+		v := word.Words[int(off)]
+
+		if v == -1 {
+			codes = append(codes, fmt.Sprintf("%d: store %f", off, word.Words[off+1]))
+			off++
+		} else if v == -2 {
+			codes = append(codes, fmt.Sprintf("%d: [loop-jmp %f]", off, word.Words[off+1]))
+			off++
+		} else if v == -3 {
+			codes = append(codes, fmt.Sprintf("%d: [cond-jmp %f]", off, word.Words[off+1]))
+			off++
+		} else if v == -4 {
+			codes = append(codes, fmt.Sprintf("%d: [jmp %f]", off, word.Words[off+1]))
+			off++
+		} else if v == -5 {
+			codes = append(codes, fmt.Sprintf("%d: [print-string %f (\"%s\")]", off, word.Words[off+1], e.strings[int(word.Words[off+1])]))
+			off++
+		} else {
+			codes = append(codes, fmt.Sprintf("%d: %s", off, e.Dictionary[int(v)].Name))
+		}
+
+		// keep going for further words
+		off++
+	}
+
+	// Didn't decompile?  Then it was a native-word
+	if len(codes) == 0 {
+		fmt.Printf("Word '%s' - [Native]\n", word.Name)
+	} else {
+		// Otherwise show the bytecode.
+		fmt.Printf("Word '%s'\n %s\n", word.Name, strings.Join(codes, "\n "))
+	}
+}
+
 // evalWord evaluates a word, by index from the dictionary
 //
 // * Functions might contain a pointer to a function implemented in go.
@@ -657,81 +741,6 @@ func (e *Eval) evalWord(index int) error {
 	return nil
 }
 
-// findWords returns the index of the specified word in our dictionary.
-//
-// Returns -1 if the word cannot be found.
-func (e *Eval) findWord(name string) int {
-	for index, word := range e.Dictionary {
-		if name == word.Name {
-			return index
-		}
-	}
-	return -1
-}
-
-// dumpWord dumps the definition of the given word.
-func (e *Eval) dumpWord(idx int) {
-
-	// Lookup the word
-	word := e.Dictionary[idx]
-
-	// Store temporary data here
-	codes := []string{}
-
-	// Walk over the opcodes in the word-definition
-	off := 0
-	for off < len(word.Words) {
-
-		// Get the actual byte
-		//
-		// Values >=0 are references to other words.
-		//
-		// Values <0 are "magic", and were created via
-		// the "compilation" process.
-		v := word.Words[int(off)]
-
-		if v == -1 {
-			codes = append(codes, fmt.Sprintf("%d: store %f", off, word.Words[off+1]))
-			off++
-		} else if v == -2 {
-			codes = append(codes, fmt.Sprintf("%d: [loop-jmp %f]", off, word.Words[off+1]))
-			off++
-		} else if v == -3 {
-			codes = append(codes, fmt.Sprintf("%d: [cond-jmp %f]", off, word.Words[off+1]))
-			off++
-		} else if v == -4 {
-			codes = append(codes, fmt.Sprintf("%d: [jmp %f]", off, word.Words[off+1]))
-			off++
-		} else if v == -5 {
-			codes = append(codes, fmt.Sprintf("%d: [print-string %f (\"%s\")]", off, word.Words[off+1], e.strings[int(word.Words[off+1])]))
-			off++
-		} else {
-			codes = append(codes, fmt.Sprintf("%d: %s", off, e.Dictionary[int(v)].Name))
-		}
-
-		// keep going for further words
-		off++
-	}
-
-	// Didn't decompile?  Then it was a native-word
-	if len(codes) == 0 {
-		fmt.Printf("Word '%s' - [Native]\n", word.Name)
-	} else {
-		// Otherwise show the bytecode.
-		fmt.Printf("Word '%s'\n %s\n", word.Name, strings.Join(codes, "\n "))
-	}
-}
-
-// printString outputs a string - replacing "\n", etc, with the
-// real codes.
-func (e *Eval) printString(str string) {
-
-	str = strings.ReplaceAll(str, "\\n", "\n")
-	str = strings.ReplaceAll(str, "\\t", "\t")
-	str = strings.ReplaceAll(str, "\\r", "\r")
-	fmt.Printf("%s", str)
-}
-
 // findVariable returns the index of the specified variable in our list
 // of variables.
 //
@@ -747,4 +756,26 @@ func (e *Eval) findVariable(name string) int {
 		}
 	}
 	return -1
+}
+
+// findWords returns the index of the specified word in our dictionary.
+//
+// Returns -1 if the word cannot be found.
+func (e *Eval) findWord(name string) int {
+	for index, word := range e.Dictionary {
+		if name == word.Name {
+			return index
+		}
+	}
+	return -1
+}
+
+// printString outputs a string - replacing "\n", etc, with the
+// real codes.
+func (e *Eval) printString(str string) {
+
+	str = strings.ReplaceAll(str, "\\n", "\n")
+	str = strings.ReplaceAll(str, "\\t", "\t")
+	str = strings.ReplaceAll(str, "\\r", "\r")
+	fmt.Printf("%s", str)
 }
