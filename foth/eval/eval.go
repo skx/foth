@@ -270,6 +270,14 @@ func (e *Eval) GetVariable(name string) (float64, error) {
 	return 0, fmt.Errorf("variable %s not found", name)
 }
 
+// Reset updates the internal state of the evaluator, which is a useful
+// thing to do if `Eval` returns an error
+func (e *Eval) Reset() {
+
+	// Clear the stack
+
+}
+
 // SetVariable stores the specified value in the variable of the given
 // name.
 //
