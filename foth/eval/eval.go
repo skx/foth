@@ -2,6 +2,7 @@
 package eval
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"strconv"
@@ -56,6 +57,9 @@ type Eval struct {
 
 	// Dictionary entries
 	Dictionary []Word
+
+	// STDOUT is the writer used for `.`, `print`, and `emit` words
+	STDOUT *bufio.Writer
 
 	// Private details
 
@@ -310,6 +314,15 @@ func (e *Eval) SetVariable(name string, value float64) {
 	}
 
 	e.vars = append(e.vars, Variable{Name: name, Value: value})
+}
+
+// SetWriter allows you to setup a special writer for all STDOUT
+// messages this application will produce.
+//
+// i.e. Writes from `.`, `emit`, `print`, and string-immediates will
+// go there.
+func (e *Eval) SetWriter(writer *bufio.Writer) {
+	e.STDOUT = writer
 }
 
 // compileToken is called with a new token, when we're in compiling-mode.
@@ -803,5 +816,11 @@ func (e *Eval) printString(str string) {
 	str = strings.ReplaceAll(str, "\\n", "\n")
 	str = strings.ReplaceAll(str, "\\t", "\t")
 	str = strings.ReplaceAll(str, "\\r", "\r")
-	fmt.Printf("%s", str)
+
+	if e.STDOUT == nil {
+		e.STDOUT = bufio.NewWriter(os.Stdout)
+	}
+
+	e.STDOUT.WriteString(str)
+	e.STDOUT.Flush()
 }
