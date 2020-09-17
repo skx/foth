@@ -108,7 +108,7 @@ func main() {
 		}
 
 		// Reset our state, to allow recovery
-		eval.Reset()
+		forth.Reset()
 
 	}
 }
