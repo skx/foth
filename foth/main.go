@@ -37,14 +37,10 @@ func doInit(eval *eval.Eval, path string) error {
 		// Trim it
 		line = strings.TrimSpace(line)
 
-		// Is this isn't comment then execute it
-		if !strings.HasPrefix(line, "#") {
-
-			// Evaluate
-			err := eval.Eval(line)
-			if err != nil {
-				fmt.Printf("ERROR: %s\n", err.Error())
-			}
+		// Evaluate
+		err := eval.Eval(line)
+		if err != nil {
+			fmt.Printf("ERROR: %s\n", err.Error())
 		}
 
 		// Repeat
