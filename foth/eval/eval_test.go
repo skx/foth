@@ -10,10 +10,23 @@ func TestBasic(t *testing.T) {
 
 	e := New()
 	e.debug = true
-	out := e.Eval("  . ")
 
+	// stack-underflow
+	out := e.Eval("  . ")
 	if out == nil {
 		t.Fatalf("expected error, got none")
+	}
+
+	// nested-comments
+	out = e.Eval(" ( one ( two ) ) ")
+	if out == nil {
+		t.Fatalf("expected error, got none")
+	}
+
+	// no error
+	out = e.Eval(".\" Hello, World \" ")
+	if out != nil {
+		t.Fatalf("unexpected")
 	}
 }
 
@@ -134,4 +147,88 @@ func TestIfThenElse(t *testing.T) {
 		}
 	}
 
+	// Test of an if with an empty stack
+	e := New()
+	e.debug = true
+	err := e.Eval(": fail if . then ; fail")
+	if err == nil {
+		t.Fatalf("expected error, got none")
+	}
 }
+
+func TestVariables(t *testing.T) {
+
+	// create instance
+	e := New()
+	e.debug = true
+
+	var v float64
+	var err error
+
+	// fetching a variable will fail, as it is not present
+	_, err = e.GetVariable("unset")
+	if err == nil {
+		t.Fatalf("expected error accessing a missing variable")
+	}
+
+	// Now set it
+	e.SetVariable("unset", 22)
+	e.SetVariable("unset", 33)
+
+	v, err = e.GetVariable("unset")
+	if err != nil {
+		t.Fatalf("unexpected error accessing variable")
+	}
+	if v != 33 {
+		t.Fatalf("variable has wrong value")
+	}
+
+	// Run a script to change the variable
+	err = e.Eval("12 unset !")
+	if err != nil {
+		t.Fatalf("error running script")
+	}
+
+	// Get the value and confirm it is updated
+	v, err = e.GetVariable("unset")
+	if err != nil {
+		t.Fatalf("unexpected error accessing variable")
+	}
+	if v != 12 {
+		t.Fatalf("variable has wrong value")
+	}
+
+	// Finally declare a variable and set the value
+	err = e.Eval("variable meow")
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+	err = e.Eval("3 meow !")
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	// Get the value and confirm it is updated
+	v, err = e.GetVariable("meow")
+	if err != nil {
+		t.Fatalf("unexpected error accessing variable")
+	}
+	if v != 3 {
+		t.Fatalf("variable has wrong value")
+	}
+
+	// Double the value of the variable
+	err = e.Eval(": double meow @ 2 * meow ! ; double")
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	v, err = e.GetVariable("meow")
+	if err != nil {
+		t.Fatalf("unexpected error accessing variable")
+	}
+	if v != 6 {
+		t.Fatalf("variable has wrong value")
+	}
+}
+

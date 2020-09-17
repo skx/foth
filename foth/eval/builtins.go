@@ -106,6 +106,17 @@ func (e *Eval) eq() error {
 	})()
 }
 
+func (e *Eval) getVar() error {
+
+	offset, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	val := e.vars[int(offset)]
+	e.Stack.Push(val.Value)
+	return nil
+}
+
 func (e *Eval) gt() error {
 	return e.binOp(func(n float64, m float64) float64 {
 		if m > n {
@@ -227,6 +238,19 @@ func (e *Eval) print() error {
 	return nil
 }
 
+func (e *Eval) setVar() error {
+	offset, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+	value, err2 := e.Stack.Pop()
+	if err2 != nil {
+		return err2
+	}
+	e.vars[int(offset)].Value = value
+	return nil
+}
+
 // startDefinition moves us into compiling-mode
 //
 // Note the interpreter handles removing this when it sees ";"
@@ -253,6 +277,11 @@ func (e *Eval) swap() error {
 	e.Stack.Push(b)
 	e.Stack.Push(a)
 
+	return nil
+}
+
+func (e *Eval) variable() error {
+	e.defining = true
 	return nil
 }
 

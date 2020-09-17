@@ -21,9 +21,9 @@
 A simple implementation of a FORTH-like language, hence _foth_ which is
 close to _forth_.
 
-If you're new to FORTH then the following wikipedia page is a good starting point:
+If you're new to FORTH then [the wikipedia page](https://en.wikipedia.org/wiki/Forth_(programming_language)) is a good starting point, and there is a good reference online reference too:
 
-* [Forth](https://en.wikipedia.org/wiki/Forth_(programming_language))
+* [Starting FORTH](https://www.forth.com/starting-forth/)
 
 In brief FORTH is a stack-based language, which uses Reverse Polish notation.   The basic _thing_ in Forth is the "word", which is a named data item, subroutine, or operator.
 
@@ -49,56 +49,38 @@ The end-result of this work is a simple scripting-language which you could easil
 * Support for basic stack operatoins (`dup`, `swap`, `drop`)
 * Support for loops, via `do`/`loop`.
 * Support for conditional-execution, via `if`, `else`, and `then`.
+* Support for declaring variables with `variable`, and getting/setting their values with `@` and `!` respectively.
 * Load any files specified on the command-line
   * If no arguments are included run the REPL
 * A standard library is loaded, from the present directory, if it is present.
   * See what we load by default in [foth/foth.4th](foth/foth.4th).
 
 
+
 ## Anti-Features
 
-The obvious omission from this implementation is support for variables, and strings in the general case (string support is limited to outputting a constant-string)
+The obvious omission from this implementation is support for strings in the general case (string support is limited to outputting a constant-string).
 
-For example in real FORTH you can set a variable "today" to be "3" with:
-
-     > VARIABLE today
-     > 3 today !
-
-Then access that variable with:
-
-     > today @
-
-Usually you'd see a helper `: ?   @ . ;` which would allow:
-
-     > today ?
-     3
-
-In our implementation we can get the _effect_ of a constant variable by defining a word, for example setting `today` to 7:
-
-     > : today 7 ;
-
-Unfortunately changing that value isn't possible because the following doesn't work as you might hope:
-
-     > : dec : today 4 ; ;
-     > dec today .
-
-This is a bug which will be fixed shortly.
+We also lack the meta-programming facilities that FORTH users would expect, in a FORTH system it is possible to implement new control-flow systems, for example, by working with words and the control-flow directly.  Instead in this system these things are unavailable, and the implementation of IF/DO/LOOP/ELSE/THEN are handled in the golang-code in a way users cannot modify.
 
 
 
 ## Implementation Approach
 
-The code evolves through a series of simple steps, guided by the comment-linked, ultimately ending with a featurefull [final revision](#final-revision) which is actually usable.
+The code evolves through a series of simple steps, guided by the comment-linked, ultimately ending with a [final revision](#final-revision) which is actually useful, usable, and pretty flexible.
 
-While it would be possible to further improve the implementation from the final stage I'm going to stop there, because I think I've done enough for the moment.
+While it would be possible to further improve the implementation from the final stage I'm going to stop shortly, because I think I've done enough for the moment.
 
-If you did want to extend further then there _are_ some obvious things to add:
+If you _did_ want to extend further then there are some obvious things to add:
 
 * Adding more of the "standard" FORTH-words.
+  * For example we're missing `mod`, `pow`, etc.
 * Case-insensitive lookup of words.
-  * e.g. "dup" should act the same way as "DUP".
-* Pull-requests to add additional functionality to the [final revision](#final-revision) are most welcome.
+  * e.g. `DUP` and `dup` should be handled identically.
 * Simplify the special-cases of string-support, along with the conditional/loop handling.
+
+Pull-requests to add additional functionality to the [final revision](#final-revision) are most welcome.
+
 
 
 ## Implementation Overview
@@ -341,6 +323,8 @@ The final version, stored beneath [foth/](foth/), is pretty similar to the previ
     * You can view all the definitions with something like this:
     * `#words 0 do dup dump loop`
   * `#words` to return the number of defined words.
+  * Variables can be declared, by name, with `variable`, and the value of the variable can be set/retrieved with `@` and `!` respectively.
+    * See this demonstrated in the [standard library](foth/foth.4th)
 * Removed all calls to `os.Exit()`
   * We return `error` objects where appropriate, allowing the caller to detect problems.
 * Make redefining existing words possible.
