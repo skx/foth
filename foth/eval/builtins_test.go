@@ -266,6 +266,38 @@ func TestEq(t *testing.T) {
 	}
 }
 
+func TestGetVar(t *testing.T) {
+
+	e := New()
+
+	// Need to have a variable set before it can be retrieved
+	e.SetVariable("foo", 93.2)
+
+	// empty stack
+	err := e.getVar()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// get the first variable.
+	e.Stack.Push(0)
+	err = e.getVar()
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	// The value should match
+	val, err := e.Stack.Pop()
+	if err != nil {
+		t.Fatalf("stack underflow")
+	}
+
+	if val != 93.2 {
+		t.Fatalf("getvar('foo') had %f not %f", val, 93.2)
+	}
+
+}
+
 func TestGt(t *testing.T) {
 
 	e := New()
@@ -648,6 +680,45 @@ func TestPrint(t *testing.T) {
 	err = e.print()
 	if err != nil {
 		t.Fatalf("unexpected error")
+	}
+
+}
+
+func TestSetVar(t *testing.T) {
+
+	e := New()
+
+	// Setup a variable
+	e.SetVariable("name", 6)
+
+	// empty stack
+	err := e.setVar()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// only one item
+	e.Stack.Push(1)
+	err = e.setVar()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// Now set
+	e.Stack.Push(32.1)
+	e.Stack.Push(0)
+	err = e.setVar()
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	// confirm it worked
+	v, err := e.GetVariable("name")
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+	if v != 32.1 {
+		t.Fatalf("value mismatch after setting variable")
 	}
 
 }
