@@ -1,4 +1,7 @@
 * [foth](#foth)
+  * [Features](#features)
+  * [Anti-Features](#anti-features)
+  * [Implementation Approach](#implementation-approach)
   * [Implementation Overview](#implementation-overview)
     * [Part 1](#part-1) - Minimal initial-implementation.
     * [Part 2](#part-2) - Hard-coded recursive word definitions.
@@ -30,6 +33,10 @@ This repository was created by following the brief tutorial posted within the fo
 
 * https://news.ycombinator.com/item?id=13082825
 
+
+
+## Features
+
 The end-result of this work is a simple scripting-language which you could easily embed within your golang application, allowing users to write simple FORTH-like scripts.  We have the kind of features you would expect from a minimal system:
 
 * Reverse-Polish mathematical operations.
@@ -47,7 +54,12 @@ The end-result of this work is a simple scripting-language which you could easil
 * A standard library is loaded, from the present directory, if it is present.
   * See what we load by default in [foth/foth.4th](foth/foth.4th).
 
-The obvious omission from this implementation is support for variables, and strings in the general case.  For example in real FORTH you can set a variable "today" to be "3" with:
+
+## Anti-Features
+
+The obvious omission from this implementation is support for variables, and strings in the general case (string support is limited to outputting a constant-string)
+
+For example in real FORTH you can set a variable "today" to be "3" with:
 
      > VARIABLE today
      > 3 today !
@@ -61,6 +73,20 @@ Usually you'd see a helper `: ?   @ . ;` which would allow:
      > today ?
      3
 
+In our implementation we can get the _effect_ of a constant variable by defining a word, for example setting `today` to 7:
+
+     > : today 7 ;
+
+Unfortunately changing that value isn't possible because the following doesn't work as you might hope:
+
+     > : dec : today 4 ; ;
+     > dec today .
+
+This is a bug which will be fixed shortly.
+
+
+
+## Implementation Approach
 
 The code evolves through a series of simple steps, guided by the comment-linked, ultimately ending with a featurefull [final revision](#final-revision) which is actually usable.
 
