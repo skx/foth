@@ -109,46 +109,57 @@ func New() *Eval {
 
 	// Populate our built-in functions.
 	e.Dictionary = []Word{
-		Word{Name: "*", Function: e.mul},
-		Word{Name: "+", Function: e.add},
-		Word{Name: "-", Function: e.sub},
-		Word{Name: ".", Function: e.print},
-		Word{Name: ".\"", Function: e.nop},
-		Word{Name: "/", Function: e.div},
-		Word{Name: ":", Function: e.startDefinition},
-		Word{Name: ";", Function: e.nop},
+		// comparisons
 		Word{Name: "<", Function: e.lt},
 		Word{Name: "<=", Function: e.ltEq},
 		Word{Name: "=", Function: e.eq},
-		Word{Name: "==", Function: e.eq},
+		Word{Name: "==", Function: e.eq}, // synonym
 		Word{Name: ">", Function: e.gt},
 		Word{Name: ">=", Function: e.gtEq},
-		Word{Name: "do", Function: e.nop, StartImmediate: true},
-		Word{Name: "drop", Function: e.drop},
-		Word{Name: "dump", Function: e.dump},
-		Word{Name: "dup", Function: e.dup},
+
+		// conditionals
 		Word{Name: "else", Function: e.nop},
-		Word{Name: "emit", Function: e.emit},
 		Word{Name: "if", Function: e.nop, StartImmediate: true},
-		Word{Name: "invert", Function: e.invert},
-		Word{Name: "loop", Function: e.loop, EndImmediate: true},
-		Word{Name: "over", Function: e.over},
-		Word{Name: "print", Function: e.print},
-		Word{Name: "swap", Function: e.swap},
 		Word{Name: "then", Function: e.nop, EndImmediate: true},
 
 		// debug-handling
 		Word{Name: "debug", Function: e.debugSet},
 		Word{Name: "debug?", Function: e.debugp},
 
-		// word-handling
-		Word{Name: "#words", Function: e.wordLen},
-		Word{Name: "words", Function: e.words},
+		// I/O
+		Word{Name: ".", Function: e.print},
+		Word{Name: ".\"", Function: e.nop},
+		Word{Name: "emit", Function: e.emit},
+		Word{Name: "print", Function: e.print},
+
+		// loop-handling
+		Word{Name: "do", Function: e.nop, StartImmediate: true},
+		Word{Name: "loop", Function: e.loop, EndImmediate: true},
+
+		// mathematical
+		Word{Name: "*", Function: e.mul},
+		Word{Name: "+", Function: e.add},
+		Word{Name: "-", Function: e.sub},
+		Word{Name: "/", Function: e.div},
+
+		// stack-related
+		Word{Name: "drop", Function: e.drop},
+		Word{Name: "dup", Function: e.dup},
+		Word{Name: "invert", Function: e.invert},
+		Word{Name: "over", Function: e.over},
+		Word{Name: "swap", Function: e.swap},
 
 		// variable-handling
 		Word{Name: "!", Function: e.setVar},
 		Word{Name: "@", Function: e.getVar},
 		Word{Name: "variable", Function: e.variable},
+
+		// word-handling
+		Word{Name: "#words", Function: e.wordLen},
+		Word{Name: ":", Function: e.startDefinition},
+		Word{Name: ";", Function: e.nop},
+		Word{Name: "dump", Function: e.dump},
+		Word{Name: "words", Function: e.words},
 	}
 
 	return e
