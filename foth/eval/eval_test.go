@@ -171,7 +171,7 @@ func TestReset(t *testing.T) {
 	// Now reset and run something else to confirm it worked
 	e.Reset()
 
-	err = e.Eval(": foo 1 3 + . ; foo ")
+	err = e.Eval(": foo 1 3 + ; foo ")
 	if err != nil {
 		t.Fatalf("expected no error, got %s", err.Error())
 	}

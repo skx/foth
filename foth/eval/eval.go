@@ -275,7 +275,25 @@ func (e *Eval) GetVariable(name string) (float64, error) {
 func (e *Eval) Reset() {
 
 	// Clear the stack
+	for !e.Stack.IsEmpty() {
+		e.Stack.Pop()
+	}
 
+	// reset our state
+	e.defining = false
+	e.immediate = 0
+	e.compiling = false
+
+	// we're not defining anything
+	e.tmp.Name = ""
+	e.tmp.Words = []float64{}
+
+	// we're not in a do/loop
+	e.doOpen = 0
+
+	// we're not in a conditional
+	e.ifOffset1 = 0
+	e.ifOffset2 = 0
 }
 
 // SetVariable stores the specified value in the variable of the given
