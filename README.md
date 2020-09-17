@@ -158,11 +158,9 @@ See [part4/](part4/) for details.
 
 ### Part 5
 
-This part adds `do`, `emit`, and `loop`, allowing simple loops.
+This part adds `do` and `loop`, allowing simple loops, and `emit` which outputs the ASCII character stored in the topmost stack-entry.
 
-(Emit outputs the ASCII character stored in the topmost stack-entry)
-
-Sample usage would look like this - note that the character `*` has the ASCII code 42:
+Sample usage would look like this:
 
     cd part5
     go build .
@@ -175,8 +173,27 @@ Sample usage would look like this - note that the character `*` has the ASCII co
     ***
     ^D
 
-Here `do` is a NOP, and the `loop` instruction handles a pair of values
-on the stack.
+(Note that the character `*` has the ASCII code 42).
+
+`do` and `loop` are pretty basic, allowing only loops to be handled which increment by one each iteration.  You cannot use the standard `i` token to get the current index, instead you can see them on the stack:
+
+* Top-most entry is the current index.
+* Second entry is the limit.
+
+So to write out numbers you could try something like this, using `dup` to duplicate the current offset within the loop:
+
+     > : l 10 0 do dup . loop ;
+     > l
+     0.000000
+     1.000000
+     2.000000
+     ..
+     8.000000
+     9.000000
+
+     > : nums 10 0 do dup 48 + emit loop ;
+     > nums
+     0123456789>
 
 See [part5/](part5/) for details.
 
