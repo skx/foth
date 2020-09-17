@@ -38,7 +38,7 @@ func doInit(eval *eval.Eval, path string) error {
 		line = strings.TrimSpace(line)
 
 		// Evaluate
-		err := eval.Eval(line)
+		err = eval.Eval(line)
 		if err != nil {
 			fmt.Printf("ERROR: %s\n", err.Error())
 		}
