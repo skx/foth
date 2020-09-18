@@ -70,7 +70,7 @@ variable val
 : bell 7 emit ;
 
 \
-\ Delay seems necessary to make bells
+\ gnome-terminal won't re-ring the bell, unless there is a delay.
 \
 : bells
     3 0 do
@@ -136,7 +136,7 @@ variable val
 \    m  -> The maximum value of the loop (which will terminate it).
 \
 : squares 0 do
-   over stars cr
+   m stars cr
   loop ;
 
 
