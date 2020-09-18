@@ -141,6 +141,8 @@ func New() *Eval {
 		Word{Name: "+", Function: e.add},
 		Word{Name: "-", Function: e.sub},
 		Word{Name: "/", Function: e.div},
+		Word{Name: "max", Function: e.max},
+		Word{Name: "min", Function: e.min},
 
 		// stack-related
 		Word{Name: ".s", Function: e.stackDump},

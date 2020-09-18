@@ -194,6 +194,24 @@ func (e *Eval) ltEq() error {
 	})()
 }
 
+func (e *Eval) max() error {
+	return e.binOp(func(n float64, m float64) float64 {
+		if m > n {
+			return m
+		}
+		return n
+	})()
+}
+
+func (e *Eval) min() error {
+	return e.binOp(func(n float64, m float64) float64 {
+		if m < n {
+			return m
+		}
+		return n
+	})()
+}
+
 func (e *Eval) mul() error {
 	return e.binOp(func(n float64, m float64) float64 { return m * n })()
 }
