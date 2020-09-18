@@ -58,15 +58,31 @@ func TestDumpWords(t *testing.T) {
 	e.dumpWord(0)
 	os.Setenv("DEBUG", "")
 }
+
 func TestError(t *testing.T) {
 
-	e := New()
-	e.debug = true
+	// Some things that will generate errors
+	tests := []string{": foo . ; foo",
 
-	err := e.Eval(": foo . ; foo ")
-	if err == nil {
-		t.Fatalf("expected error, got none")
+		// two stack-items are expected for `do`
+		": foo do i emit loop ; foo",
+		": foo 2 do i emit loop ; foo",
+
+		// i & m only within a loop-body
+		": foo i ; foo",
+		": foo m ; foo",
 	}
+
+	for _, test := range tests {
+		e := New()
+		e.debug = true
+
+		err := e.Eval(test)
+		if err == nil {
+			t.Fatalf("expected error, got none for: %s", test)
+		}
+	}
+
 }
 
 // Try running one of each of our test-cases
@@ -305,13 +321,19 @@ func TestSetWriter(t *testing.T) {
 
 	// write something more complex
 	b.Reset()
-	err = e.Eval("10 0 do dup 48 + emit loop")
+
+	// i is the current loop index
+	// m is the max
+	//
+	// so we're outputting "1/10", "2/10", etc.
+	//
+	err = e.Eval("10 0 do i 48 + emit 47 emit m . loop")
 	if err != nil {
 		t.Fatalf("unexpected error")
 	}
 
-	if b.String() != "0123456789" {
-		t.Fatalf("STDOUT didn't match, got '%s'", b.String())
+	if b.String() != "0/10\n1/10\n2/10\n3/10\n4/10\n5/10\n6/10\n7/10\n8/10\n9/10\n" {
+		t.Fatalf("STDOUT didn't match, got '%s' for ", b.String())
 	}
 
 	// Finally a string literal

@@ -677,6 +677,7 @@ func (e *Eval) dumpWord(idx int) {
 			off++
 		} else if v == -11 {
 			codes = append(codes, fmt.Sprintf("%d: [loop-test]", off))
+			off++
 		} else {
 			codes = append(codes, fmt.Sprintf("%d: %s", off, e.Dictionary[int(v)].Name))
 		}
