@@ -59,7 +59,7 @@ The end-result of this work is a simple scripting-language which you could easil
 You can easily install the final binary like so:
 
 ```
-$ go get github.com/skx/foth/foth@v0.1.0
+$ go get github.com/skx/foth/foth@v0.2.0
 
 ```
 
