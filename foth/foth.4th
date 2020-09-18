@@ -68,6 +68,19 @@ variable val
 
 
 \
+\ We define `=` (and `==`) by default, but we do not have a built-in
+\ function for not-equals.  We can fix that now:
+\
+: != = invert ;
+
+\
+\ Similarly we do not have a built-in method for abs(N), so we
+\ can resolve that here
+\
+: abs dup 0 > if 1 else -1 then * ;
+
+
+\
 \ CR: Output a carrige return (newline).
 \
 : cr 10 emit ;
@@ -76,6 +89,10 @@ variable val
 \ Star: Output a star to the console.
 \
 \ Here 42 is the ASCII code for the "*" character.
+\
+\ If you prefer you could use:
+\
+\   : star '*' emit ;
 \
 : star 42 emit ;
 
