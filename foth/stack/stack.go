@@ -8,9 +8,19 @@ import (
 // Stack holds our numbers.
 type Stack []float64
 
+// At shows the value at the given offset
+func (s *Stack) At(offset int) float64 {
+	return (*s)[offset]
+}
+
 // IsEmpty checks if our stack is empty.
 func (s *Stack) IsEmpty() bool {
 	return len(*s) == 0
+}
+
+// Len returns the length of the stack
+func (s *Stack) Len() int {
+	return len(*s)
 }
 
 // Push adds a new number to the stack

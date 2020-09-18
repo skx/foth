@@ -16,7 +16,12 @@ func TestEmpty(t *testing.T) {
 	if s.IsEmpty() {
 		t.Fatalf("populated stack should not be empty")
 	}
-
+	if s.Len() != 1 {
+		t.Fatalf("stack length was wrong")
+	}
+	if s.At(0) != 33 {
+		t.Fatalf("stack value was wrong")
+	}
 	s.Pop()
 	if !s.IsEmpty() {
 		t.Fatalf("stack should be back to new")

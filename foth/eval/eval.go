@@ -143,6 +143,8 @@ func New() *Eval {
 		Word{Name: "/", Function: e.div},
 
 		// stack-related
+		Word{Name: ".s", Function: e.stackDump},
+		Word{Name: "clearstack", Function: e.clearStack},
 		Word{Name: "drop", Function: e.drop},
 		Word{Name: "dup", Function: e.dup},
 		Word{Name: "invert", Function: e.invert},

@@ -34,6 +34,13 @@ func (e *Eval) add() error {
 	return e.binOp(func(n float64, m float64) float64 { return n + m })()
 }
 
+func (e *Eval) clearStack() error {
+	for !e.Stack.IsEmpty() {
+		e.Stack.Pop()
+	}
+	return nil
+}
+
 func (e *Eval) debugSet() error {
 
 	v, err := e.Stack.Pop()
@@ -249,6 +256,20 @@ func (e *Eval) setVar() error {
 	}
 	e.vars[int(offset)].Value = value
 	return nil
+}
+
+func (e *Eval) stackDump() error {
+	l := e.Stack.Len()
+	e.printString(fmt.Sprintf("<%d> ", l))
+
+	c := 0
+	for c < l {
+		e.printString(fmt.Sprintf("%f ", e.Stack.At(c)))
+		c++
+	}
+	e.printString("\n")
+	return nil
+
 }
 
 // startDefinition moves us into compiling-mode
