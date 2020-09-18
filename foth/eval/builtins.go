@@ -142,6 +142,15 @@ func (e *Eval) gtEq() error {
 	})()
 }
 
+func (e *Eval) i() error {
+	if len(e.loops) > 0 {
+		i := e.loops[len(e.loops)-1].Current
+		e.Stack.Push(float64(i))
+		return nil
+	}
+	return fmt.Errorf("you cannot access 'i' outside a loop-body")
+}
+
 func (e *Eval) invert() error {
 	v, err := e.Stack.Pop()
 	if err != nil {
@@ -194,6 +203,16 @@ func (e *Eval) min() error {
 		}
 		return n
 	})()
+}
+
+func (e *Eval) m() error {
+	if len(e.loops) > 0 {
+		m := e.loops[len(e.loops)-1].Max
+		e.Stack.Push(float64(m))
+		return nil
+	}
+
+	return fmt.Errorf("you cannot access 'm' outside a loop-body")
 }
 
 func (e *Eval) mul() error {

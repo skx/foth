@@ -163,7 +163,9 @@ func New() *Eval {
 
 		// loop-handling
 		Word{Name: "do", Function: e.nop, StartImmediate: true},
+		Word{Name: "i", Function: e.i},
 		Word{Name: "loop", Function: e.loop, EndImmediate: true},
+		Word{Name: "m", Function: e.m},
 
 		// mathematical
 		Word{Name: "*", Function: e.mul},
