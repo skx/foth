@@ -39,10 +39,11 @@ This repository was created by following the brief tutorial posted within the fo
 
 The end-result of this work is a simple scripting-language which you could easily embed within your golang application, allowing users to write simple FORTH-like scripts.  We have the kind of features you would expect from a minimal system:
 
-* Reverse-Polish mathematical operations.
 * Comments between `(` and `)` are ignored, as expected.
   * Single-line comments `\` to the end of the line are also supported.
 * Support for floating-point numbers (anything that will fit inside a `float64`).
+* Reverse-Polish mathematical operations.
+  * Including support for `abs`, `min`, `max`, etc.
 * Support for printing the top-most stack element (`.`, or `print`).
 * Support for outputting ASCII characters (`emit`).
 * Support for outputting strings (`." Hello, World "`).
@@ -308,7 +309,7 @@ I found this page useful, it also documents `invert` which I added for completen
 
 The final version, stored beneath [foth/](foth/), is pretty similar to the previous part, however there have been a lot of changes behind the scenes:
 
-* We've added a large number of test cases, with a good amount of test-coverage.
+* We've added a large number of test cases, to the extent we have almost 100% coverage.
 * We use a simple [lexer/](lexer/) to tokenize our input
   * This was required to allow us to ignore comments, and handle string literals.
   * Merely splitting on whitespace characters would have left either of those impossible.
@@ -316,18 +317,20 @@ The final version, stored beneath [foth/](foth/), is pretty similar to the previ
   * `$COND IF word1 [ .. wordN ] else alt_word1 [.. altN] then [more_word1 more_word2 ..]`
 * It is now possible to use `if`, `else`, `then`, `do`, and `loop` outside word-definitions.
   * i.e. Immediately.
+* `do`/`loop` loops can be nested.
+  * And the new words `i` and `m` used to return the current index and maximum index, respectively.
 * There were many new words defined:
   * `debug` to change the debug-flag.
   * `debug?` to reveal the status.
-  * `dump` dump the compiled form of the given word
-    * You can view all the definitions with something like this:
-    * `#words 0 do dup dump loop`
+  * `dump` dumps the compiled form of the given word.
+    * You can view the definitions of all available words this:
+    * `#words 0 do i dump loop`
   * `#words` to return the number of defined words.
   * Variables can be declared, by name, with `variable`, and the value of the variable can be set/retrieved with `@` and `!` respectively.
     * See this demonstrated in the [standard library](foth/foth.4th)
 * Removed all calls to `os.Exit()`
   * We return `error` objects where appropriate, allowing the caller to detect problems.
-* Make redefining existing words possible.
+* It is now possible to redefining existing words.
   * Note that due to our implementation previously defined words remain unchanged, even if a word is replaced/updated.
 * Load any files specified on the command line.
   * If no files are specified run the REPL.
