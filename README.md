@@ -56,6 +56,14 @@ The end-result of this work is a simple scripting-language which you could easil
 * A standard library is loaded, from the present directory, if it is present.
   * See what we load by default in [foth/foth.4th](foth/foth.4th).
 
+You can easily install the final binary like so:
+
+```
+$ go get github.com/skx/foth/foth@v0.1.0
+
+```
+
+The executable will try to load [foth.4th](foth/foth.4th) from the current-directory, so you'll want to fetch that too.  But otherwise it should work as you'd expect - the init-file defines several useful words, so running without it is a little annoying but it isn't impossible.
 
 
 ## Anti-Features
