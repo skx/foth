@@ -68,9 +68,9 @@ We also lack the meta-programming facilities that FORTH users would expect, in a
 
 ## Implementation Approach
 
-The code evolves through a series of simple steps, guided by the comment-linked, ultimately ending with a [final revision](#final-revision) which is actually useful, usable, and pretty flexible.
+The code evolves through a series of simple steps, [directy by the comment-thread](https://news.ycombinator.com/item?id=13082825), ultimately ending with a [final revision](#final-revision) which is actually useful, usable, and pretty flexible.
 
-While it would be possible to further improve the implementation from the final stage I'm going to stop shortly, because I think I've done enough for the moment.
+While it would certainly be possible to further improve the implementation I'm going to declare this project as "complete" for my own tastes.
 
 If you _did_ want to extend further then there are some obvious things to add:
 
@@ -80,7 +80,7 @@ If you _did_ want to extend further then there are some obvious things to add:
   * e.g. `DUP` and `dup` should be handled identically.
 * Simplify the special-cases of string-support, along with the conditional/loop handling.
 
-Pull-requests to add additional functionality to the [final revision](#final-revision) are most welcome.
+Certainly pull-requests adding additional functionality will be accepted with thanks.
 
 
 

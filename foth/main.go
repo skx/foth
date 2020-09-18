@@ -13,7 +13,7 @@ import (
 	"os"
 	"strings"
 
-	"foth/eval"
+	"github.com/skx/foth/foth/eval"
 )
 
 // "secret" word

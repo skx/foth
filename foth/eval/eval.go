@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"foth/lexer"
-	"foth/stack"
+	"github.com/skx/foth/foth/lexer"
+	"github.com/skx/foth/foth/stack"
 )
 
 // Loop holds the state of a running do/while loop.
