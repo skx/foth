@@ -5,7 +5,48 @@ import (
 	"testing"
 )
 
-// Comments should be reoved
+// Test single-character constants
+func TestCharacter(t *testing.T) {
+
+	var out []Token
+	var err error
+
+	// unterminated character
+	l := New(` '*`)
+	_, err = l.Tokens()
+	if err == nil {
+		t.Fatalf("expected error, got none")
+	}
+	if !strings.Contains(err.Error(), "unterminated") {
+		t.Fatalf("got an error, but the wrong kind")
+	}
+
+	// single character
+	l = New(` '*' `)
+	out, err = l.Tokens()
+	if err != nil {
+		t.Fatalf("error lexing: %s", err)
+	}
+	if len(out) != 1 {
+		t.Fatalf("wrong number of tokens")
+	}
+	if out[0].Name != "42" {
+		t.Fatalf("unexpected result: %v", out[0].Name)
+	}
+
+	// unclosed character
+	l = New(` '** `)
+	_, err = l.Tokens()
+	if err == nil {
+		t.Fatalf("expected error, got none")
+	}
+	if !strings.Contains(err.Error(), "syntax error") {
+		t.Fatalf("got an error, but the wrong kind")
+	}
+
+}
+
+// Comments should be removed
 func TestComment(t *testing.T) {
 
 	l := New(` to \ This is a comment

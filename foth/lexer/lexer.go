@@ -65,6 +65,27 @@ func (l *Lexer) Tokens() ([]Token, error) {
 				offset++
 			}
 
+		case "'":
+			// We parse 'x' as the ASCII code of the character x.
+
+			// can we peek ahead two characters?
+			if offset+2 < len(l.input) {
+
+				// confirm we have a close
+				if string(l.input[offset+2]) == "'" {
+
+					c := l.input[offset+1]
+					d := int(c)
+					s := fmt.Sprintf("%d", d)
+					res = append(res, Token{Name: s})
+					offset += 2
+				} else {
+					return res, fmt.Errorf("syntax error")
+				}
+			} else {
+				return res, fmt.Errorf("unterminated single-character constant")
+			}
+
 		case "(":
 
 			// skip the "("
