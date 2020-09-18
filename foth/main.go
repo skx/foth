@@ -105,10 +105,10 @@ func main() {
 		err = forth.Eval(text)
 		if err != nil {
 			fmt.Printf("ERROR: %s\n", err.Error())
-		}
 
-		// Reset our state, to allow recovery
-		forth.Reset()
+			// Reset our state, to allow recovery
+			forth.Reset()
+		}
 
 	}
 }
