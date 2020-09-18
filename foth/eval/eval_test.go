@@ -32,6 +32,41 @@ func TestBasic(t *testing.T) {
 	}
 }
 
+func TestClearWords(t *testing.T) {
+
+	// create instance
+	e := New()
+	e.debug = true
+
+	// Push some stuff
+	err := e.Eval("1 3 4 5")
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	// Ensure it is non-empty
+	if e.Stack.IsEmpty() {
+		t.Fatalf("unexpected stack")
+	}
+	if e.Stack.Len() != 4 {
+		t.Fatalf("unexpected stack")
+	}
+
+	// Clear the stack
+	err = e.Eval(".s clearstack")
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	// Ensure it is non-empty
+	if !e.Stack.IsEmpty() {
+		t.Fatalf("unexpected stack")
+	}
+	if e.Stack.Len() != 0 {
+		t.Fatalf("unexpected stack")
+	}
+
+}
 func TestDumpWords(t *testing.T) {
 
 	// dummy test
@@ -58,15 +93,31 @@ func TestDumpWords(t *testing.T) {
 	e.dumpWord(0)
 	os.Setenv("DEBUG", "")
 }
+
 func TestError(t *testing.T) {
 
-	e := New()
-	e.debug = true
+	// Some things that will generate errors
+	tests := []string{": foo . ; foo",
 
-	err := e.Eval(": foo . ; foo ")
-	if err == nil {
-		t.Fatalf("expected error, got none")
+		// two stack-items are expected for `do`
+		": foo do i emit loop ; foo",
+		": foo 2 do i emit loop ; foo",
+
+		// i & m only within a loop-body
+		": foo i ; foo",
+		": foo m ; foo",
 	}
+
+	for _, test := range tests {
+		e := New()
+		e.debug = true
+
+		err := e.Eval(test)
+		if err == nil {
+			t.Fatalf("expected error, got none for: %s", test)
+		}
+	}
+
 }
 
 // Try running one of each of our test-cases
@@ -165,6 +216,73 @@ func TestIfThenElse(t *testing.T) {
 	err := e.Eval(": fail if . then ; fail")
 	if err == nil {
 		t.Fatalf("expected error, got none")
+	}
+}
+
+func TestMaxMin(t *testing.T) {
+
+	errors := []string{
+		// no entry
+		"max",
+		"min",
+
+		// one too few
+		"3 max",
+		"3 min"}
+
+	for _, txt := range errors {
+
+		// create instance
+		e := New()
+		e.debug = true
+
+		err := e.Eval(txt)
+		if err == nil {
+			t.Fatalf("expected an error, got none")
+		}
+		if !strings.Contains(err.Error(), "underflow") {
+			t.Fatalf("found wrong error: %s", err.Error())
+		}
+	}
+
+	type TestCase struct {
+		Input  string
+		Result float64
+	}
+
+	tests := []TestCase{
+		{Input: "3 4 max", Result: 4},
+		{Input: "4 3 max", Result: 4},
+		{Input: "3 3 max", Result: 3},
+		{Input: "-4 -30 max", Result: -4},
+
+		{Input: "3 4 min", Result: 3},
+		{Input: "4 3 min", Result: 3},
+		{Input: "2 2 min", Result: 2},
+		{Input: "-4 -30 min", Result: -30},
+	}
+
+	for _, test := range tests {
+
+		// create instance
+		e := New()
+		e.debug = true
+
+		err := e.Eval(test.Input)
+		if err != nil {
+			t.Fatalf("unexpected error")
+		}
+
+		ret, err2 := e.Stack.Pop()
+		if err2 != nil {
+			t.Fatalf("failed to get stack value")
+		}
+		if !e.Stack.IsEmpty() {
+			t.Fatalf("expected stack to be empty, it wasn't")
+		}
+		if ret != test.Result {
+			t.Fatalf("unexpected result for %s -> %f", test.Input, ret)
+		}
 	}
 }
 
@@ -305,13 +423,19 @@ func TestSetWriter(t *testing.T) {
 
 	// write something more complex
 	b.Reset()
-	err = e.Eval("10 0 do dup 48 + emit loop")
+
+	// i is the current loop index
+	// m is the max
+	//
+	// so we're outputting "1/10", "2/10", etc.
+	//
+	err = e.Eval("10 0 do i 48 + emit 47 emit m . loop")
 	if err != nil {
 		t.Fatalf("unexpected error")
 	}
 
-	if b.String() != "0123456789" {
-		t.Fatalf("STDOUT didn't match, got '%s'", b.String())
+	if b.String() != "0/10\n1/10\n2/10\n3/10\n4/10\n5/10\n6/10\n7/10\n8/10\n9/10\n" {
+		t.Fatalf("STDOUT didn't match, got '%s' for ", b.String())
 	}
 
 	// Finally a string literal

@@ -13,9 +13,6 @@
 \
 \        ( comment ( comment again ) )
 \
-\        This is only supported here because we process single-line
-\        comments before the other kind of comments.
-
 
 \
 \ Declare a variable named `PI`
@@ -68,6 +65,23 @@ variable val
 
 
 \
+\ bell: make some noise
+\
+: bell 7 emit ;
+
+\
+\ Delay seems necessary to make bells
+\
+: bells
+    3 0 do
+        bell
+        3000000 0 do
+            nop
+        loop
+    loop
+;
+
+\
 \ We define `=` (and `==`) by default, but we do not have a built-in
 \ function for not-equals.  We can fix that now:
 \
@@ -108,9 +122,18 @@ variable val
 : stars dup 0 > if 0 do star loop else drop then ;
 
 \
-\ Squares: Draw a box
+\ Squares: Draw a square of stars
 \
 \          e.g. 10 squares
+\
+\ Here we define a loop that runs from N to 0, and we use "m" as
+\ the maximum-value of the loop.
+\
+\ Inside loop-bodies we can access two variables like that:
+\
+\    i  -> The current value of the loop
+\
+\    m  -> The maximum value of the loop (which will terminate it).
 \
 : squares 0 do
    over stars cr
@@ -140,14 +163,13 @@ variable val
 : bootup ." Welcome to foth!\n " ;
 bootup
 
-
 \
 \ IF test
 \
 \ This section of the startup-file outputs either "hot" or "cold" depending
 \ on whether a number is <0 or not.
 \
-\ Here we repeat our work because we don't have support for ELSE when we
+\ Here we repeat our work because we did't have support for ELSE when we
 \ added this example.
 \
 
@@ -166,16 +188,19 @@ bootup
 \
 
 \ Output "frozen\n"
-: frozen 102 emit 114 emit 111 emit 122 emit 101 emit 110 emit 10 emit ;
+: frozen ." frozen\n " ;
 
 \ Output "NOT frozen\n"
-: non_frozen 78 emit 79 emit 84 emit 32 emit 102 emit 114 emit 111 emit 122 emit  101 emit 110 emit 10 emit ;
+: non_frozen ." NOT frozen\n " ;
 
-\ Output one or other of the messages?
+\ Output the appropiate message.
 : frozen? 0 <= if frozen else non_frozen then cr ;
 
-\ All in one.
-: frozen2? 0 <= if ." frozen " else ." not frozen " then cr ;
+\
+\ Or we could have written the following word to do everything
+\ in one-step:
+\
+: frozen2? 0 <= if ." frozen " else ." NOT frozen " then cr ;
 
 
 \

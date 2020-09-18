@@ -12,6 +12,18 @@ import (
 	"foth/stack"
 )
 
+// Loop holds the state of a running do/while loop.
+type Loop struct {
+	// Start is the starting number our loop begins from.
+	Start int
+
+	// Max holds the terminating number our loop finishes at.
+	Max int
+
+	// Current holds the current number of the iteration.
+	Current int
+}
+
 // Variable is the structure for storing variable names, and contents
 type Variable struct {
 	// Name is the name of the variable
@@ -49,7 +61,10 @@ type Word struct {
 	EndImmediate bool
 }
 
-// Eval is our evaluation structure
+// Eval is our evaluation structure, which holds state of where
+// we're executing code from.
+//
+// The state includes the variables, inline-strings, etc.
 type Eval struct {
 
 	// Stack holds our operands.
@@ -66,6 +81,13 @@ type Eval struct {
 	// Literal strings.  As encountered in our program.
 	strings []string
 
+	// Have we already bumped our immediate-count?
+	//
+	// This is a gross-hack to account for the fact that
+	// compileToken needs to bump the immediate-count when
+	// it sees a nested do, or similar token.
+	bumped bool
+
 	// Are we in a compiling mode?
 	compiling bool
 
@@ -78,8 +100,9 @@ type Eval struct {
 	// Temporary word we're compiling
 	tmp Word
 
-	// open of the last do
-	doOpen int
+	// We keep a stack of the last time we saw a `do` token,
+	// so we can pair it with the appropriate matching `loop`.
+	doOpen []int
 
 	// When we generate IF-statements we have to patch one or two
 	// offsets, depending on whether there is an ELSE branch present
@@ -88,6 +111,12 @@ type Eval struct {
 	// Here we keep track of them
 	ifOffset1 int
 	ifOffset2 int
+
+	// Loops stores loops which are currently open.
+	//
+	// When we compile `do` we add a new one, when the `loop`
+	// word is completed we remove one.
+	loops []Loop
 
 	// Variables
 	vars []Variable
@@ -134,7 +163,9 @@ func New() *Eval {
 
 		// loop-handling
 		Word{Name: "do", Function: e.nop, StartImmediate: true},
+		Word{Name: "i", Function: e.i},
 		Word{Name: "loop", Function: e.loop, EndImmediate: true},
+		Word{Name: "m", Function: e.m},
 
 		// mathematical
 		Word{Name: "*", Function: e.mul},
@@ -240,6 +271,7 @@ func (e *Eval) Eval(input string) error {
 			// Are we starting immediate mode?
 			if !e.compiling && e.Dictionary[idx].StartImmediate {
 				e.immediate++
+				e.bumped = true
 
 				// Errors here can't happen.
 				//
@@ -310,7 +342,8 @@ func (e *Eval) Reset() {
 	e.tmp.Words = []float64{}
 
 	// we're not in a do/loop
-	e.doOpen = 0
+	e.doOpen = []int{}
+	e.loops = []Loop{}
 
 	// we're not in a conditional
 	e.ifOffset1 = 0
@@ -409,6 +442,26 @@ func (e *Eval) compileToken(token lexer.Token) error {
 	idx := e.findWord(tok)
 	if idx >= 0 {
 
+		//
+		// We have to do some juggling here because
+		// when we find a word with `EndImmediate` we
+		// terminate.
+		//
+		// So we have to make sure we don't terminate
+		// early if something else opened.
+		//
+		// i.e. "loop" would usually terminate immediate-mode,
+		// but we can't stop there for definitions that use
+		// nested loops
+		//
+		if imm && e.Dictionary[idx].StartImmediate {
+			if e.bumped {
+				e.immediate--
+				e.bumped = false
+			}
+			e.immediate++
+		}
+
 		// Found the word, add to the end.
 		e.tmp.Words = append(e.tmp.Words, float64(idx))
 
@@ -420,15 +473,33 @@ func (e *Eval) compileToken(token lexer.Token) error {
 
 		// If the word was a "DO"
 		if tok == "do" {
-			e.doOpen = len(e.tmp.Words) - 1
+
+			// keep track of where we are
+			e.doOpen = append(e.doOpen, len(e.tmp.Words)-1)
+
+			// we compile this into a "new-loop" instruction
+			e.tmp.Words = append(e.tmp.Words, -10)
+			e.tmp.Words = append(e.tmp.Words, 99) // dull
 		}
 
 		// if the word was a "LOOP"
 		if tok == "loop" {
 
-			// offset of do must be present
-			e.tmp.Words = append(e.tmp.Words, -2)
-			e.tmp.Words = append(e.tmp.Words, float64(e.doOpen))
+			// We load the loop, increment, etc.
+			e.tmp.Words = append(e.tmp.Words, -11)
+			e.tmp.Words = append(e.tmp.Words, 99) // dull
+
+			// We've bumped the instance, and pushed
+			// a result onto the stack now.
+			//
+			// So we jump back to repeat if we must.
+			e.tmp.Words = append(e.tmp.Words, -3)
+			e.tmp.Words = append(e.tmp.Words, float64(e.doOpen[len(e.doOpen)-1]+3))
+
+			// We've matched the do-loop pair - drop the
+			// open-reference
+			e.doOpen = e.doOpen[:len(e.doOpen)-1]
+
 		}
 
 		// output a string, in compiled form
@@ -592,9 +663,6 @@ func (e *Eval) dumpWord(idx int) {
 		if v == -1 {
 			codes = append(codes, fmt.Sprintf("%d: store %f", off, word.Words[off+1]))
 			off++
-		} else if v == -2 {
-			codes = append(codes, fmt.Sprintf("%d: [loop-jmp %f]", off, word.Words[off+1]))
-			off++
 		} else if v == -3 {
 			codes = append(codes, fmt.Sprintf("%d: [cond-jmp %f]", off, word.Words[off+1]))
 			off++
@@ -603,6 +671,12 @@ func (e *Eval) dumpWord(idx int) {
 			off++
 		} else if v == -5 {
 			codes = append(codes, fmt.Sprintf("%d: [print-string %f (\"%s\")]", off, word.Words[off+1], e.strings[int(word.Words[off+1])]))
+			off++
+		} else if v == -10 {
+			codes = append(codes, fmt.Sprintf("%d: [new-loop]", off))
+			off++
+		} else if v == -11 {
+			codes = append(codes, fmt.Sprintf("%d: [loop-test]", off))
 			off++
 		} else {
 			codes = append(codes, fmt.Sprintf("%d: %s", off, e.Dictionary[int(v)].Name))
@@ -635,8 +709,6 @@ func (e *Eval) dumpWord(idx int) {
 //
 //    "-1" means the next value is a number
 //
-//    "-2" is an loop jump, which will change our IP.
-//
 //    "-3" is a conditional-jump, which will change our IP if
 //         the topmost item on the stack is "0".
 //
@@ -644,6 +716,12 @@ func (e *Eval) dumpWord(idx int) {
 //
 //    "-5" prints a string, stored in our literal-area.
 //         Dynamic strings are not supported.
+//
+//    "-10" creates a new Loop structure.
+//          (i.e. `do`).
+//
+//    "-11" handles the test/termination of a loop condition.
+//          (i.e. `loop`).
 //
 func (e *Eval) evalWord(index int) error {
 
@@ -704,35 +782,7 @@ func (e *Eval) evalWord(index int) error {
 			// print a string
 			e.printString(e.strings[int(opcode)])
 			state = "default"
-		} else if state == "loop-jump" {
 
-			// If the two top-most entries
-			// are not equal, then jump
-			//
-			// TODO: This is horrid
-			cur, ee := e.Stack.Pop()
-			if ee != nil {
-				return ee
-			}
-			max, eee := e.Stack.Pop()
-			if eee != nil {
-				return eee
-			}
-
-			if max > cur {
-				// put them back
-				e.Stack.Push(max)
-				e.Stack.Push(cur)
-
-				// change opcode
-				ip = int(opcode)
-
-				// decrement as it'll get bumped at
-				// the foot of the loop
-				ip--
-			}
-
-			state = "default"
 		} else if state == "cond-jump" {
 			// Jump only if 0 is on the top of the stack.
 			//
@@ -758,6 +808,50 @@ func (e *Eval) evalWord(index int) error {
 				}
 			}
 			state = "default"
+		} else if state == "new-loop" {
+
+			// given the two-values on the stack
+			// create and save a new Loop structure
+			// to describe this loop.
+			cur, err := e.Stack.Pop()
+			if err != nil {
+				return err
+			}
+
+			max, err2 := e.Stack.Pop()
+			if err2 != nil {
+				return err2
+			}
+
+			// new loop
+			l := Loop{
+				Start:   int(cur),
+				Max:     int(max),
+				Current: int(cur),
+			}
+
+			// save it away
+			e.loops = append(e.loops, l)
+			state = "default"
+		} else if state == "loop-test" {
+
+			// we've working with the last loop
+			l := len(e.loops) - 1
+
+			// bump the count
+			e.loops[l].Current++
+
+			// test to see if the loop is over
+			if e.loops[l].Current >= e.loops[l].Max {
+				e.Stack.Push(1)
+
+				// loop is over now
+				e.loops = e.loops[:len(e.loops)-1]
+			} else {
+				e.Stack.Push(0)
+			}
+
+			state = "default"
 		} else if state == "jump" {
 
 			// change opcode
@@ -768,18 +862,19 @@ func (e *Eval) evalWord(index int) error {
 			state = "default"
 		} else if state == "default" {
 
-			// if we see -1 we're adding a number
 			switch opcode {
 			case -1:
 				state = "add-number"
-			case -2:
-				state = "loop-jump"
 			case -3:
 				state = "cond-jump"
 			case -4:
 				state = "jump"
 			case -5:
 				state = "string-print"
+			case -10:
+				state = "new-loop"
+			case -11:
+				state = "loop-test"
 			default:
 				err := e.evalWord(int(opcode))
 				if err != nil {

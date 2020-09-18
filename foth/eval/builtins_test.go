@@ -424,43 +424,6 @@ func TestInvert(t *testing.T) {
 
 }
 
-func TestLoop(t *testing.T) {
-
-	e := New()
-
-	// empty stack
-	err := e.loop()
-	if err == nil {
-		t.Fatalf("expected error with empty stack")
-	}
-
-	e.Stack.Push(10)
-	e.loop()
-	if err == nil {
-		t.Fatalf("expected error with empty stack")
-	}
-
-	// Two values
-	e.Stack.Push(4)
-	e.Stack.Push(54)
-
-	e.loop()
-	a, err := e.Stack.Pop()
-	if a != 55 {
-		t.Fatalf("unexpected result, got %f", a)
-	}
-	if err != nil {
-		t.Fatalf("unexpected error")
-	}
-	b, err2 := e.Stack.Pop()
-	if b != 4 {
-		t.Fatalf("unexpected result, got %f", b)
-	}
-	if err2 != nil {
-		t.Fatalf("unexpected error")
-	}
-}
-
 func TestLt(t *testing.T) {
 
 	e := New()
