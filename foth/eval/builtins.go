@@ -157,22 +157,6 @@ func (e *Eval) invert() error {
 }
 
 func (e *Eval) loop() error {
-	var cur, max float64
-	var err error
-	cur, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-	max, err = e.Stack.Pop()
-	if err != nil {
-		return err
-	}
-
-	cur++
-
-	e.Stack.Push(max)
-	e.Stack.Push(cur)
-
 	return nil
 }
 
