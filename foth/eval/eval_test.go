@@ -219,6 +219,73 @@ func TestIfThenElse(t *testing.T) {
 	}
 }
 
+func TestMaxMin(t *testing.T) {
+
+	errors := []string{
+		// no entry
+		"max",
+		"min",
+
+		// one too few
+		"3 max",
+		"3 min"}
+
+	for _, txt := range errors {
+
+		// create instance
+		e := New()
+		e.debug = true
+
+		err := e.Eval(txt)
+		if err == nil {
+			t.Fatalf("expected an error, got none")
+		}
+		if !strings.Contains(err.Error(), "underflow") {
+			t.Fatalf("found wrong error: %s", err.Error())
+		}
+	}
+
+	type TestCase struct {
+		Input  string
+		Result float64
+	}
+
+	tests := []TestCase{
+		{Input: "3 4 max", Result: 4},
+		{Input: "4 3 max", Result: 4},
+		{Input: "3 3 max", Result: 3},
+		{Input: "-4 -30 max", Result: -4},
+
+		{Input: "3 4 min", Result: 3},
+		{Input: "4 3 min", Result: 3},
+		{Input: "2 2 min", Result: 2},
+		{Input: "-4 -30 min", Result: -30},
+	}
+
+	for _, test := range tests {
+
+		// create instance
+		e := New()
+		e.debug = true
+
+		err := e.Eval(test.Input)
+		if err != nil {
+			t.Fatalf("unexpected error")
+		}
+
+		ret, err2 := e.Stack.Pop()
+		if err2 != nil {
+			t.Fatalf("failed to get stack value")
+		}
+		if !e.Stack.IsEmpty() {
+			t.Fatalf("expected stack to be empty, it wasn't")
+		}
+		if ret != test.Result {
+			t.Fatalf("unexpected result for %s -> %f", test.Input, ret)
+		}
+	}
+}
+
 func TestReset(t *testing.T) {
 
 	// create instance
