@@ -175,6 +175,9 @@ func New() *Eval {
 		Word{Name: "max", Function: e.max},
 		Word{Name: "min", Function: e.min},
 
+		// misc
+		Word{Name: "nop", Function: e.nop},
+
 		// stack-related
 		Word{Name: ".s", Function: e.stackDump},
 		Word{Name: "clearstack", Function: e.clearStack},
