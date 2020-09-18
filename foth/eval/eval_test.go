@@ -32,6 +32,41 @@ func TestBasic(t *testing.T) {
 	}
 }
 
+func TestClearWords(t *testing.T) {
+
+	// create instance
+	e := New()
+	e.debug = true
+
+	// Push some stuff
+	err := e.Eval("1 3 4 5")
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	// Ensure it is non-empty
+	if e.Stack.IsEmpty() {
+		t.Fatalf("unexpected stack")
+	}
+	if e.Stack.Len() != 4 {
+		t.Fatalf("unexpected stack")
+	}
+
+	// Clear the stack
+	err = e.Eval(".s clearstack")
+	if err != nil {
+		t.Fatalf("unexpected error")
+	}
+
+	// Ensure it is non-empty
+	if !e.Stack.IsEmpty() {
+		t.Fatalf("unexpected stack")
+	}
+	if e.Stack.Len() != 0 {
+		t.Fatalf("unexpected stack")
+	}
+
+}
 func TestDumpWords(t *testing.T) {
 
 	// dummy test
