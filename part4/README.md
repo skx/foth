@@ -63,6 +63,7 @@ If we skip ahead to the [final version](../foth/) we gain access to a `dump` com
 
 Using that we can show the compiled version of the `+1` word we defined in this README:
 
+```
    $ cd ../foth
    $ go build .
    $ ./foth
@@ -76,14 +77,15 @@ Using that we can show the compiled version of the `+1` word we defined in this 
    Word '+1'
      0: store 1.000000
      2: +
+```
 
 Here we used `#words` to get a count of all the defined words (`words` would show their names).  To start with we see there are 71 words (0-70).  Then we define our new one, and confirm the count is updated.
 
 The final step is to dump the word, and we see that the array containing the implementation contains three entries:
 
-  0x00: -1
-  0x01: 1.0
-  0x02: +
+* 0x00: -1
+* 0x01: 1.0
+* 0x02: +
 
 (The -1 is implicit here, and you have to guess that two bytes have been taken by the offset/index in the left-column.)
 
