@@ -6,13 +6,19 @@ Part six of the implementation is very similar to [part5](../part5/), the differ
 
 In FORTH `if` looks like this:
 
-    : one? 1 = if 42 emit 10 emit then ;
-    1 one?
+```
+: one? 1 = if 42 emit 10 emit then ;
+```
+
+`if` will execute if the top-most word on the stack is `1`, otherwise it will skip to the word after the `then`.
+
+(Of course if there were `else` support then that would be jumped to instead!)
+
 
 
 ## Building
 
-To build, and run this version:
+To build and run this version:
 
 ```
 go build .
@@ -27,7 +33,7 @@ go build .
 > ^D
 ```
 
-Here we've defined a word which takes a number from the stack, compares it with `1` and if equal outputs a star.
+Here we've defined a word which takes a number from the stack, compares it with `1` and if equal outputs a star (and newline).
 
 You'll see that we've implemented a whole bunch of new primitives, specifically to allow new conditional things:
 
@@ -58,8 +64,8 @@ When we implement that we have to have this in our definition:
     b
     <
     if
-    -3
-    XXX
+    -3           \ -3 is a JUMP opcode, which conditionally
+    XXX          \ jumps to the specified offset.
      do
      stuff
   XXX:
