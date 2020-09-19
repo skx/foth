@@ -52,14 +52,14 @@ func NewEval() *Eval {
 	// Populate the dictionary of words we have implemented
 	// which are hard-coded.
 	e.Dictionary = []Word{
-		Word{Name: "+", Function: e.add},             // 0
-		Word{Name: "-", Function: e.sub},             // 1
-		Word{Name: "*", Function: e.mul},             // 2
-		Word{Name: "/", Function: e.div},             // 3
-		Word{Name: "print", Function: e.print},       // 4
-		Word{Name: ".", Function: e.print},           // 5
-		Word{Name: "dup", Function: e.dup},           // 6
-		Word{Name: ":", Function: e.startDefinition}, // 7
+		{Name: "+", Function: e.add},             // 0
+		{Name: "-", Function: e.sub},             // 1
+		{Name: "*", Function: e.mul},             // 2
+		{Name: "/", Function: e.div},             // 3
+		{Name: "print", Function: e.print},       // 4
+		{Name: ".", Function: e.print},           // 5
+		{Name: "dup", Function: e.dup},           // 6
+		{Name: ":", Function: e.startDefinition}, // 7
 		// Note we don't handle ";" here.
 	}
 	return e

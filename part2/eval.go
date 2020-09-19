@@ -49,14 +49,14 @@ func NewEval() *Eval {
 	// square - which is implemented as just "dup *".  The implementation
 	// just has the offsets in this array of the words used to invoke.
 	e.Dictionary = []Word{
-		Word{Name: "+", Function: e.add},                        // 0
-		Word{Name: "-", Function: e.sub},                        // 1
-		Word{Name: "*", Function: e.mul},                        // 2
-		Word{Name: "/", Function: e.div},                        // 3
-		Word{Name: "print", Function: e.print},                  // 4
-		Word{Name: ".", Function: e.print},                      // 5
-		Word{Name: "dup", Function: e.dup},                      // 6
-		Word{Name: "square", Function: nil, Words: []int{6, 2}}, // 7
+		{Name: "+", Function: e.add},                        // 0
+		{Name: "-", Function: e.sub},                        // 1
+		{Name: "*", Function: e.mul},                        // 2
+		{Name: "/", Function: e.div},                        // 3
+		{Name: "print", Function: e.print},                  // 4
+		{Name: ".", Function: e.print},                      // 5
+		{Name: "dup", Function: e.dup},                      // 6
+		{Name: "square", Function: nil, Words: []int{6, 2}}, // 7
 	}
 	return e
 }

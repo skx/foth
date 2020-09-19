@@ -35,12 +35,12 @@ func NewEval() *Eval {
 	// Populate the dictionary of words we have implemented
 	// which are hard-coded.
 	e.Dictionary = []Word{
-		Word{"+", e.add},       // 0
-		Word{"-", e.sub},       // 1
-		Word{"*", e.mul},       // 2
-		Word{"/", e.div},       // 3
-		Word{"print", e.print}, // 4
-		Word{".", e.print},     // 5
+		{"+", e.add},       // 0
+		{"-", e.sub},       // 1
+		{"*", e.mul},       // 2
+		{"/", e.div},       // 3
+		{"print", e.print}, // 4
+		{".", e.print},     // 5
 	}
 	return e
 }

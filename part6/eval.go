@@ -58,29 +58,29 @@ func NewEval() *Eval {
 	// Populate the dictionary of words we have implemented
 	// which are hard-coded.
 	e.Dictionary = []Word{
-		Word{Name: "*", Function: e.mul},
-		Word{Name: "+", Function: e.add},
-		Word{Name: "-", Function: e.sub},
-		Word{Name: ".", Function: e.print},
-		Word{Name: "/", Function: e.div},
-		Word{Name: ":", Function: e.startDefinition},
-		Word{Name: "<", Function: e.lt},
-		Word{Name: "<=", Function: e.ltEq},
-		Word{Name: "=", Function: e.eq},
-		Word{Name: "==", Function: e.eq},
-		Word{Name: ">", Function: e.gt},
-		Word{Name: ">=", Function: e.gtEq},
-		Word{Name: "do", Function: e.do},  // NOP
-		Word{Name: "if", Function: e.iff}, // NOP
-		Word{Name: "invert", Function: e.invert},
-		Word{Name: "drop", Function: e.drop},
-		Word{Name: "dup", Function: e.dup},
-		Word{Name: "emit", Function: e.emit},
-		Word{Name: "loop", Function: e.loop},
-		Word{Name: "print", Function: e.print},
-		Word{Name: "swap", Function: e.swap},
-		Word{Name: "then", Function: e.then}, // NOP
-		Word{Name: "words", Function: e.words},
+		{Name: "*", Function: e.mul},
+		{Name: "+", Function: e.add},
+		{Name: "-", Function: e.sub},
+		{Name: ".", Function: e.print},
+		{Name: "/", Function: e.div},
+		{Name: ":", Function: e.startDefinition},
+		{Name: "<", Function: e.lt},
+		{Name: "<=", Function: e.ltEq},
+		{Name: "=", Function: e.eq},
+		{Name: "==", Function: e.eq},
+		{Name: ">", Function: e.gt},
+		{Name: ">=", Function: e.gtEq},
+		{Name: "do", Function: e.do},  // NOP
+		{Name: "if", Function: e.iff}, // NOP
+		{Name: "invert", Function: e.invert},
+		{Name: "drop", Function: e.drop},
+		{Name: "dup", Function: e.dup},
+		{Name: "emit", Function: e.emit},
+		{Name: "loop", Function: e.loop},
+		{Name: "print", Function: e.print},
+		{Name: "swap", Function: e.swap},
+		{Name: "then", Function: e.then}, // NOP
+		{Name: "words", Function: e.words},
 	}
 
 	return e
