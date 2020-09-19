@@ -427,6 +427,7 @@ func (e *Eval) compileToken(token lexer.Token) error {
 	if tok == ";" {
 
 		// Save the word to our dictionary
+		e.tmp.Name = strings.ToLower(e.tmp.Name)
 		e.Dictionary = append(e.Dictionary, e.tmp)
 
 		// Show what we compiled each new definition
@@ -917,6 +918,8 @@ func (e *Eval) findVariable(name string) int {
 //
 // Returns -1 if the word cannot be found.
 func (e *Eval) findWord(name string) int {
+	name = strings.ToLower(name)
+
 	for index, word := range e.Dictionary {
 		if name == word.Name {
 			return index
