@@ -51,7 +51,9 @@ go build .
   * Once we hit `;` we add this new word to the dictionary of known-words
 * [main.go](main.go) just reads STDIN, line by line, and passes to the evaluator
 
-There is one omission here - if we're in compiling mode we cannot handle numbers.  Recall that when we're executing code we add any number to the stack, as we encounter it.
+## Problems / Omissions
+
+There is one large omission in this part, if we're in compiling mode we cannot handle numbers!  Recall that when we're executing code we add any number to the stack, as we encounter it.
 
 At the point we're compiling words we don't have any way of using the stack though - that only comes into play when we're _executing_ the word.
 
