@@ -65,7 +65,7 @@ The end-result of this work is a simple scripting-language which you could easil
 
 ## Installation
 
-You can find binary releases of the final-version upon the [project release page](), but if you prefer you can install from source easily.
+You can find binary releases of the final-version upon the [project release page](https://github.com/skx/foth/releases), but if you prefer you can install from source easily.
 
 Either run this to get the installation:
 
