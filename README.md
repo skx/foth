@@ -70,7 +70,7 @@ You can find binary releases of the final-version upon the [project release page
 Either run this to get the installation:
 
 ```
-$ go get github.com/skx/foth/foth@v0.3.0
+$ go get github.com/skx/foth/foth@v0.4.0
 
 ```
 
