@@ -171,22 +171,22 @@ func TestIfThenElse(t *testing.T) {
 	}
 
 	tests := []Test{
-		Test{input: "3 3 = if 1 then", result: 1},
-		Test{input: "3 3 = if .\" ok \" 1 then", result: 1},
-		Test{input: ": f 3 3 = if 1 then ; f", result: 1},
-		Test{input: ": f 3 3 = if .\" ok \" 1 then ; f", result: 1},
+		{input: "3 3 = if 1 then", result: 1},
+		{input: "3 3 = if .\" ok \" 1 then", result: 1},
+		{input: ": f 3 3 = if 1 then ; f", result: 1},
+		{input: ": f 3 3 = if .\" ok \" 1 then ; f", result: 1},
 
-		Test{input: "3 3 = invert if 1 else 2 then", result: 2},
-		Test{input: ": f 3 3 = invert if 1 else 2 then ; f", result: 2},
+		{input: "3 3 = invert if 1 else 2 then", result: 2},
+		{input: ": f 3 3 = invert if 1 else 2 then ; f", result: 2},
 
-		Test{input: "3 31 = if 0 else 3 then", result: 3},
-		Test{input: ": f 3 31 = if 0 else 3 then ; f ", result: 3},
+		{input: "3 31 = if 0 else 3 then", result: 3},
+		{input: ": f 3 31 = if 0 else 3 then ; f ", result: 3},
 
-		Test{input: "3 31 = if 1 else 12 then", result: 12},
-		Test{input: ": f 3 31 = if 1 else 12 then ; f", result: 12},
+		{input: "3 31 = if 1 else 12 then", result: 12},
+		{input: ": f 3 31 = if 1 else 12 then ; f", result: 12},
 
-		Test{input: "3 21 = invert if 221 else 112 then", result: 221},
-		Test{input: ": ff 3 21 = invert if 221 else 112 then ; ff ", result: 221},
+		{input: "3 21 = invert if 221 else 112 then", result: 221},
+		{input: ": ff 3 21 = invert if 221 else 112 then ; ff ", result: 221},
 	}
 
 	for _, test := range tests {
