@@ -56,6 +56,9 @@ go build .
   * Once we hit `;` we add this new word to the dictionary of known-words
 * [main.go](main.go) just reads STDIN, line by line, and passes to the evaluator
 
+**NOTE**: As a consequence of storing numbers inside the definition of the word, prefixed by the `-1` marker, we've had to change the word-array to be an array of `float64` values - not integers.
+
+
 
 ## More Details
 
