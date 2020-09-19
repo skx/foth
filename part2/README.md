@@ -9,7 +9,7 @@ our `Word`-structure to allow words to be executed in two ways:
 * A word can contain a reference to a (go) function.
   * If present this is called, as before.
 * If there is no (go) function reference we do something different.
-  * We call existing words, based on their directory index
+  * We call existing words, based on their dictionary index.
 
 ## Building
 

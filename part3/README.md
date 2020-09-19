@@ -9,7 +9,7 @@ Our `Word`-structure looks the same as in the previous part:
 * A word can contain a reference to a (go) function.
   * If present this is called, as before.
 * If there is no (go) function reference we do something different.
-  * We call existing words, based on their directory index
+  * We call existing words, based on their dictionary index.
 
 The difference is in our evaluator itself:
 
