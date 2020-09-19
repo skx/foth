@@ -215,6 +215,12 @@ func (e *Eval) m() error {
 	return fmt.Errorf("you cannot access 'm' outside a loop-body")
 }
 
+func (e *Eval) mod() error {
+	return e.binOp(func(n float64, m float64) float64 {
+		return float64(int(m) % int(n))
+	})()
+}
+
 func (e *Eval) mul() error {
 	return e.binOp(func(n float64, m float64) float64 { return m * n })()
 }

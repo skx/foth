@@ -516,6 +516,56 @@ func TestLtEq(t *testing.T) {
 	}
 }
 
+func TestMod(t *testing.T) {
+
+	e := New()
+
+	// empty stack
+	err := e.mod()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	// only one item
+	e.Stack.Push(1)
+	err = e.mod()
+	if err == nil {
+		t.Fatalf("expected error with empty stack")
+	}
+
+	type TestCase struct {
+		in  float64
+		out float64
+	}
+
+	tests := []TestCase{{in: 1, out: 1},
+		{in: 2, out: 2},
+		{in: 3, out: 3},
+		{in: 4, out: 0},
+		{in: 5, out: 1},
+		{in: 6, out: 2},
+		{in: 7, out: 3},
+		{in: 8, out: 0},
+		{in: 9, out: 1},
+		{in: 10, out: 2},
+	}
+
+	for _, test := range tests {
+		// two items
+		e.Stack.Push(test.in)
+		e.Stack.Push(4)
+		err = e.mod()
+		if err != nil {
+			t.Fatalf("expected no error, but got one")
+		}
+
+		x, _ := e.Stack.Pop()
+		if x != test.out {
+			t.Fatalf("wrong result %f %% 4.  Got %f, not %f", test.in, x, test.out)
+		}
+	}
+}
+
 func TestMul(t *testing.T) {
 
 	e := New()

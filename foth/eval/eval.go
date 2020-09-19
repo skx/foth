@@ -174,6 +174,7 @@ func New() *Eval {
 		Word{Name: "/", Function: e.div},
 		Word{Name: "max", Function: e.max},
 		Word{Name: "min", Function: e.min},
+		Word{Name: "mod", Function: e.mod},
 
 		// misc
 		Word{Name: "nop", Function: e.nop},
