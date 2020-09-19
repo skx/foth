@@ -95,6 +95,20 @@ variable val
 
 
 \
+\ Is closely related to abs, which we've just defined.
+\
+: negate ( n - n ) -1 * ;
+
+
+\
+\ On the topic of numbers we can also test if numbers are odd, and
+\ even very easily.
+\
+: even? 2 mod 0 = ;
+: odd? 2 mod 1 = ;
+
+
+\
 \ CR: Output a carrige return (newline).
 \
 : cr 10 emit ;
