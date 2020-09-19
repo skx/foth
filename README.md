@@ -93,7 +93,7 @@ We also lack the meta-programming facilities that FORTH users would expect, in a
 
 ## Implementation Approach
 
-The code evolves through a series of simple steps, [directy by the comment-thread](https://news.ycombinator.com/item?id=13082825), ultimately ending with a [final revision](#final-revision) which is actually useful, usable, and pretty flexible.
+The code evolves through a series of simple steps, [contained in this comment-thread](https://news.ycombinator.com/item?id=13082825), ultimately ending with a [final revision](#final-revision) which is actually useful, usable, and pretty flexible.
 
 While it would certainly be possible to further improve the implementation I'm going to declare this project as "complete" for my own tastes.
 
@@ -101,7 +101,11 @@ If you _did_ want to extend further then there are some obvious things to add:
 
 * Adding more of the "standard" FORTH-words.
   * For example we're missing `pow`, etc.
-* Simplify the special-cases of string-support, along with the conditional/loop handling.
+* Simplify the special-cases of string-support.
+* Simplify the conditional/loop handling.
+  * Both of these probably involve using a proper return-stack.
+  * This would have the side-effect of allowing new control-flow primitives to be added.
+  * As well as more meta-programming.
 
 Certainly pull-requests adding additional functionality will be accepted with thanks.
 
@@ -109,7 +113,7 @@ Certainly pull-requests adding additional functionality will be accepted with th
 
 ## Implementation Overview
 
-Each subdirectory gets a bit further down the comment-chain.
+Each subdirectory within this repository gets a bit further down the comment-chain.
 
 In terms of implementation two files are _largely_ unchanged in each example:
 
@@ -119,8 +123,9 @@ In terms of implementation two files are _largely_ unchanged in each example:
 
 Each example builds upon the previous ones, with a pair of implementation files that change:
 
-* `builtins.go` contains the words implemented in golang.
+* `builtins.go` contains the forth-words implemented in golang.
 * `eval.go` is the workhorse which implements to FORTH-like interpreter.
+  * This allows executing existing words, and defining new ones.
 
 
 ### Part 1
@@ -187,6 +192,7 @@ See [part3/](part3/) for details.
 **NOTE**: We don't support using numbers in definitions, yet.  That will come in part4!
 
 
+
 ### Part 4
 
 Part four allows the user to define their own words, including the use of numbers, from within the REPL.  Here the magic is handling the input of numbers when in "compiling mode".
@@ -213,16 +219,25 @@ This part adds `do` and `loop`, allowing simple loops, and `emit` which outputs 
 
 Sample usage would look like this:
 
-    cd part5
-    go build .
-    ./part5
-    > : star 42 emit ;
-    > : stars 0 do star loop 10 emit ;
-    > 10 stars
-    **********
-    > 3 stars
-    ***
-    ^D
+```
+> : cr 10 emit ;
+> : star 42 emit ;
+> : stars 0 do star loop cr ;
+> 4 stars
+****
+> 5 stars
+*****
+> 1 stars
+*
+> 10 stars
+**********
+^D
+```
+
+Here we've defined two new words `cr` to print a return, and `star` to output a single star.
+
+We then defined the `stars` word to use a loop to print the given number of stars.
+
 
 (Note that the character `*` has the ASCII code 42).
 
