@@ -1,3 +1,7 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/skx/foth)](https://goreportcard.com/report/github.com/skx/foth)
+[![license](https://img.shields.io/github/license/skx/foth.svg)](https://github.com/skx/foth/blob/master/LICENSE)
+[![Release](https://img.shields.io/github/release/skx/foth.svg)](https://github.com/skx/foth/releases/latest)
+
 * [foth](#foth)
   * [Features](#features)
   * [Anti-Features](#anti-features)
