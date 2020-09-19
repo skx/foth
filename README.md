@@ -1,3 +1,4 @@
+[![GoDoc](https://img.shields.io/static/v1?label=godoc&message=reference&color=blue)](https://pkg.go.dev/github.com/skx/foth@v0.3.0/foth?tab=overview)
 [![Go Report Card](https://goreportcard.com/badge/github.com/skx/foth)](https://goreportcard.com/report/github.com/skx/foth)
 [![license](https://img.shields.io/github/license/skx/foth.svg)](https://github.com/skx/foth/blob/master/LICENSE)
 [![Release](https://img.shields.io/github/release/skx/foth.svg)](https://github.com/skx/foth/releases/latest)
