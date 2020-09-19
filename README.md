@@ -65,14 +65,16 @@ The end-result of this work is a simple scripting-language which you could easil
 
 ## Installation
 
-You can easily install the final binary like so:
+You can find binary releases of the final-version upon the [project release page](), but if you prefer you can install from source easily.
+
+Either run this to get the installation:
 
 ```
 $ go get github.com/skx/foth/foth@v0.3.0
 
 ```
 
-Failing that clone this repository, and build the final revision like so:
+Or clone this repository, and build the executable like so:
 
 ```
 cd foth
