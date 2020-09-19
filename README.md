@@ -47,7 +47,7 @@ The end-result of this work is a simple scripting-language which you could easil
 * Support for printing the top-most stack element (`.`, or `print`).
 * Support for outputting ASCII characters (`emit`).
 * Support for outputting strings (`." Hello, World "`).
-* Support for basic stack operatoins (`dup`, `swap`, `drop`)
+* Support for basic stack operations (`clearstack`, `drop`, `dup`, `over`, `swap`, `.s`)
 * Support for loops, via `do`/`loop`.
 * Support for conditional-execution, via `if`, `else`, and `then`.
 * Support for declaring variables with `variable`, and getting/setting their values with `@` and `!` respectively.
@@ -83,9 +83,7 @@ While it would certainly be possible to further improve the implementation I'm g
 If you _did_ want to extend further then there are some obvious things to add:
 
 * Adding more of the "standard" FORTH-words.
-  * For example we're missing `mod`, `pow`, etc.
-* Case-insensitive lookup of words.
-  * e.g. `DUP` and `dup` should be handled identically.
+  * For example we're missing `pow`, etc.
 * Simplify the special-cases of string-support, along with the conditional/loop handling.
 
 Certainly pull-requests adding additional functionality will be accepted with thanks.
@@ -324,10 +322,12 @@ The final version, stored beneath [foth/](foth/), is pretty similar to the previ
 * The `if` handling has been updated to support an `else`-branch, the general form is now:
   * `$COND IF word1 [ .. wordN ] else alt_word1 [.. altN] then [more_word1 more_word2 ..]`
 * It is now possible to use `if`, `else`, `then`, `do`, and `loop` outside word-definitions.
-  * i.e. Immediately.
+  * i.e. Immediately in the REPL.
 * `do`/`loop` loops can be nested.
   * And the new words `i` and `m` used to return the current index and maximum index, respectively.
-* There were many new words defined:
+* There were many new words defined in the go-core:
+  * `.s` to show the stack-contents.
+  * `clearstack` to clear the stack.
   * `debug` to change the debug-flag.
   * `debug?` to reveal the status.
   * `dump` dumps the compiled form of the given word.
@@ -336,6 +336,8 @@ The final version, stored beneath [foth/](foth/), is pretty similar to the previ
   * `#words` to return the number of defined words.
   * Variables can be declared, by name, with `variable`, and the value of the variable can be set/retrieved with `@` and `!` respectively.
     * See this demonstrated in the [standard library](foth/foth.4th)
+* There were some new words defined in the [standard library](foth/foth.4th)
+  * e.g. `abs`, `even?`, `negate`, `odd?`,
 * Removed all calls to `os.Exit()`
   * We return `error` objects where appropriate, allowing the caller to detect problems.
 * It is now possible to redefining existing words.
