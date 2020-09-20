@@ -106,6 +106,13 @@ func TestError(t *testing.T) {
 		// i & m only within a loop-body
 		": foo i ; foo",
 		": foo m ; foo",
+
+		// loop without a do
+		": foo loop ; foo",
+
+		// if without an if
+		": foo else ; foo",
+		": foo then ; foo",
 	}
 
 	for _, test := range tests {

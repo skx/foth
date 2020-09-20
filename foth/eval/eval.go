@@ -490,6 +490,11 @@ func (e *Eval) compileToken(token lexer.Token) error {
 		// if the word was a "LOOP"
 		if tok == "loop" {
 
+			// "loop" without a "do" will be a fatal error
+			if len(e.doOpen) < 1 {
+				return fmt.Errorf("'loop' without an opening 'do'")
+			}
+
 			// We load the loop, increment, etc.
 			e.tmp.Words = append(e.tmp.Words, -11)
 			e.tmp.Words = append(e.tmp.Words, 99) // dull
@@ -565,6 +570,12 @@ func (e *Eval) compileToken(token lexer.Token) error {
 		}
 
 		if tok == "else" {
+
+			// no offsets defined?  Then we've got a bug
+			if e.ifOffset1 == 0 && e.ifOffset2 == 0 {
+				return fmt.Errorf("'else' without an 'if'")
+			}
+
 			e.tmp.Words[e.ifOffset1-1] = float64(len(e.tmp.Words) + 2)
 
 			// before we compile the end we have to
@@ -577,7 +588,12 @@ func (e *Eval) compileToken(token lexer.Token) error {
 
 		if tok == "then" {
 
-			// back - patch the jump offset to the position of this word
+			// no offsets defined?  Then we've got a bug
+			if e.ifOffset1 == 0 && e.ifOffset2 == 0 {
+				return fmt.Errorf("'then' without an 'if'")
+			}
+
+			// back-patch the jump offset to the position of this word
 			if e.ifOffset2 > 0 {
 				e.tmp.Words[e.ifOffset2-1] = float64(len(e.tmp.Words))
 			} else {
