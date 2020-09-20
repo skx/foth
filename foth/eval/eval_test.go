@@ -110,7 +110,7 @@ func TestError(t *testing.T) {
 		// loop without a do
 		": foo loop ; foo",
 
-		// if without an if
+		// else/then without an if
 		": foo else ; foo",
 		": foo then ; foo",
 	}
