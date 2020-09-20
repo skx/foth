@@ -27,23 +27,26 @@
 A simple implementation of a FORTH-like language, hence _foth_ which is
 close to _forth_.
 
-If you're new to FORTH then [the wikipedia page](https://en.wikipedia.org/wiki/Forth_(programming_language)) is a good starting point, and there is a good reference online reference too:
+If you're new to FORTH then [the wikipedia page](https://en.wikipedia.org/wiki/Forth_(programming_language)) is a good starting point, and there are more good reads online such as:
 
+* [Forth in 7 easy steps](https://jeelabs.org/article/1612b/)
+  * Just ignore any mention of the return-stack!
 * [Starting FORTH](https://www.forth.com/starting-forth/)
+  * A complete book, but the navigation of this site is non-obvious.
 
-In brief FORTH is a stack-based language, which uses Reverse Polish notation.   The basic _thing_ in Forth is the "word", which is a named data item, subroutine, or operator.
+In brief FORTH is a stack-based language, which uses Reverse Polish notation.   The basic _thing_ in Forth is the "word", which is a named data item, subroutine, or operator.  Programming consists largely of defining new words, which are stored in a so-called "dictionary", in terms of existing ones.  Iteratively building up a local DSL suited to your particular task.
 
-Programming in Forth consists largely of defining new words, which are stored in a so-called "dictionary", in terms of existing ones.
-
-This repository was created by following the brief tutorial posted within the following Hacker News thread:
+This repository was created by following the brief tutorial posted within the following Hacker News thread, designed to demonstrate how you could implement something _like_ FORTH, in a series of simple steps:
 
 * https://news.ycombinator.com/item?id=13082825
+
+The comment-thread shows example-code and pseudo-code in C, of course this repository is written in Go.
 
 
 
 ## Features
 
-The end-result of this work is a simple scripting-language which you could easily embed within your golang application, allowing users to write simple FORTH-like scripts.  We have the kind of features you would expect from a minimal system:
+The end-result of this work is a simple scripting-language which you could easily embed within your golang application, allowing users to write simple FORTH-like scripts.  We implement the kind of features a FORTH-user would expect:
 
 * Comments between `(` and `)` are ignored, as expected.
   * Single-line comments `\` to the end of the line are also supported.
@@ -57,8 +60,8 @@ The end-result of this work is a simple scripting-language which you could easil
 * Support for loops, via `do`/`loop`.
 * Support for conditional-execution, via `if`, `else`, and `then`.
 * Support for declaring variables with `variable`, and getting/setting their values with `@` and `!` respectively.
-* Load any files specified on the command-line
-  * If no arguments are included run the REPL
+* Execute files specified on the command-line.
+  * If no arguments are supplied run a simple REPL instead.
 * A standard library is loaded, from the present directory, if it is present.
   * See what we load by default in [foth/foth.4th](foth/foth.4th).
 
@@ -67,7 +70,7 @@ The end-result of this work is a simple scripting-language which you could easil
 
 You can find binary releases of the final-version upon the [project release page](https://github.com/skx/foth/releases), but if you prefer you can install from source easily.
 
-Either run this to get the installation:
+Either run this to download and install the binary:
 
 ```
 $ go get github.com/skx/foth/foth@v0.4.0
@@ -82,7 +85,7 @@ go build .
 ./fofh
 ```
 
-The executable will try to load [foth.4th](foth/foth.4th) from the current-directory, so you'll want to fetch that too.  But otherwise it should work as you'd expect - the init-file defines several useful words, so running without it is a little annoying but it isn't impossible.
+The executable will try to load [foth.4th](foth/foth.4th) from the current-directory, so you'll want to fetch that too.  But otherwise it should work as you'd expect - the startup-file defines several useful words, so running without it is a little annoying but it isn't impossible.
 
 
 ## Anti-Features
@@ -91,25 +94,35 @@ The obvious omission from this implementation is support for strings in the gene
 
 We also lack the meta-programming facilities that FORTH users would expect, in a FORTH system it is possible to implement new control-flow systems, for example, by working with words and the control-flow directly.  Instead in this system these things are unavailable, and the implementation of IF/DO/LOOP/ELSE/THEN are handled in the golang-code in a way users cannot modify.
 
+Basically we ignore the common FORTH-approach of using a return-stack, and implementing a VM with "cells".  Instead we just emulate the _behaviour_ of the more advanced words:
+
+* So we implement `if` or `do`/`loop` in a hard-coded fashion.
+  * That means we can't allow a user to define `while`, or similar.
+  * But otherwise our language is flexible enough to allow _real_ work to be done with it.
 
 
 ## Implementation Approach
 
-The code evolves through a series of simple steps, [contained in this comment-thread](https://news.ycombinator.com/item?id=13082825), ultimately ending with a [final revision](#final-revision) which is actually useful, usable, and pretty flexible.
+The code evolves through a series of simple steps, [contained in the comment-thread](https://news.ycombinator.com/item?id=13082825), ultimately ending with a [final revision](#final-revision) which is actually useful, usable, and pretty flexible.
 
-While it would certainly be possible to further improve the implementation I'm going to declare this project as "complete" for my own tastes.
+While it would certainly be possible to further improve the implementation I'm going to declare this project as "almost complete" for my own tastes:
 
-If you _did_ want to extend further then there are some obvious things to add:
+* I'll make minor changes, as they occur to me.
+* Comments, test-cases, and similar are fair game.
+* Outright crashes will be resolved, if I spot any.
+* But no major new features will be added.
+
+If **you** wanted to extend things further then there are some obvious things to work upon:
 
 * Adding more of the "standard" FORTH-words.
   * For example we're missing `pow`, etc.
-* Simplify the special-cases of string-support.
+* Simplify the special-case handling of string-support.
 * Simplify the conditional/loop handling.
   * Both of these probably involve using a proper return-stack.
   * This would have the side-effect of allowing new control-flow primitives to be added.
   * As well as more meta-programming.
 
-Certainly pull-requests adding additional functionality will be accepted with thanks.
+Pull-requests adding additional functionality will be accepted with thanks.
 
 
 
@@ -347,12 +360,12 @@ I found this page useful, it also documents `invert` which I added for completen
 
 ### Final Revision
 
-The final version, stored beneath [foth/](foth/), is pretty similar to the previous part, however there have been a lot of changes behind the scenes:
+The final version, stored beneath [foth/](foth/), is pretty similar to the previous part from an end-user point of view, however there have been a lot of changes behind the scenes:
 
-* We've added a large number of test cases, to the extent we have almost 100% coverage.
-* We use a simple [lexer/](lexer/) to tokenize our input
+* We've added near 100% test-coverage.
+* We've added a simple [lexer/](lexer/) to tokenize our input.
   * This was required to allow us to ignore comments, and handle string literals.
-  * Merely splitting on whitespace characters would have left either of those impossible.
+  * Merely splitting input-strings at whitespace characters would have made either of those impossible to handle correctly.
 * The `if` handling has been updated to support an `else`-branch, the general form is now:
   * `$COND IF word1 [ .. wordN ] else alt_word1 [.. altN] then [more_word1 more_word2 ..]`
 * It is now possible to use `if`, `else`, `then`, `do`, and `loop` outside word-definitions.
@@ -373,10 +386,9 @@ The final version, stored beneath [foth/](foth/), is pretty similar to the previ
 * There were some new words defined in the [standard library](foth/foth.4th)
   * e.g. `abs`, `even?`, `negate`, `odd?`,
 * Removed all calls to `os.Exit()`
-  * We return `error` objects where appropriate, allowing the caller to detect problems.
+  * We now return `error` objects where appropriate, allowing the caller to detect problems.
 * It is now possible to redefining existing words.
-  * Note that due to our implementation previously defined words remain unchanged, even if a word is replaced/updated.
-* Load any files specified on the command line.
+* Execute any files specified on the command line.
   * If no files are specified run the REPL.
 
 See [foth/](foth/) for the implementation.
@@ -403,9 +415,10 @@ The handling of loops isn't correct when there should be zero-iterations:
      ^D
 ```
 
-In our `stars` definition we handle this by explicitly testing the loop
-value before we proceed - At the moment any loop of `0 0` will run once
-so you'll need to add that test if we can't fix this for the general case.
+**NOTE**: In `gforth` the result of `0 0 do ... loop` is actually an __infinite__ loop, which is perhaps worse!
+
+In our `stars` definition we handle this case by explicitly testing the loop
+value before we proceed, only running the loop if the value is non-zero.
 
 
 
