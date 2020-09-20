@@ -245,30 +245,12 @@ func (e *Eval) over() error {
 	return nil
 }
 func (e *Eval) print() error {
-	a, err := e.Stack.Pop()
+	n, err := e.Stack.Pop()
 	if err != nil {
 		return err
 	}
-
-	// If the value on the top of the stack is an integer
-	// then show it as one - i.e. without any ".00000".
-	if float64(int(a)) == a {
-		e.printString(fmt.Sprintf("%d\n", int(a)))
-		return nil
-	}
-
-	// OK we have a floating-point result.  Show it, but
-	// remove any trailing "0".
-	//
-	// This means we get 1.25 instead of 1.2500000 shown
-	// when the user runs `5 4 / .`.
-	//
-	output := fmt.Sprintf("%f", a)
-
-	for strings.HasSuffix(output, "0") {
-		output = strings.TrimSuffix(output, "0")
-	}
-	e.printString(fmt.Sprintf("%s\n", output))
+	e.printNumber(n)
+	e.printString("\n")
 	return nil
 }
 
@@ -291,7 +273,8 @@ func (e *Eval) stackDump() error {
 
 	c := 0
 	for c < l {
-		e.printString(fmt.Sprintf("%f ", e.Stack.At(c)))
+		e.printNumber(e.Stack.At(c))
+		e.printString(" ")
 		c++
 	}
 	e.printString("\n")

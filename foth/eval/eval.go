@@ -928,6 +928,31 @@ func (e *Eval) findWord(name string) int {
 	return -1
 }
 
+// printNumber - outputs a floating-point number.  However if the
+// value is actually an integer then that is displayed instead.
+func (e *Eval) printNumber(n float64) {
+
+	// If the value on the top of the stack is an integer
+	// then show it as one - i.e. without any ".00000".
+	if float64(int(n)) == n {
+		e.printString(fmt.Sprintf("%d", int(n)))
+		return
+	}
+
+	// OK we have a floating-point result.  Show it, but
+	// remove any trailing "0".
+	//
+	// This means we get 1.25 instead of 1.2500000 shown
+	// when the user runs `5 4 / .`.
+	//
+	output := fmt.Sprintf("%f", n)
+
+	for strings.HasSuffix(output, "0") {
+		output = strings.TrimSuffix(output, "0")
+	}
+	e.printString(fmt.Sprintf("%s", output))
+}
+
 // printString outputs a string - replacing "\n", etc, with the
 // real codes.
 func (e *Eval) printString(str string) {
