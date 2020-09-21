@@ -6,6 +6,7 @@
 * [foth](#foth)
   * [Features](#features)
   * [Installation](#installation)
+  * [Embedded Usage](#embedded-usage)
   * [Anti-Features](#anti-features)
   * [Implementation Approach](#implementation-approach)
   * [Implementation Overview](#implementation-overview)
@@ -86,6 +87,18 @@ go build .
 ```
 
 The executable will try to load [foth.4th](foth/foth.4th) from the current-directory, so you'll want to fetch that too.  But otherwise it should work as you'd expect - the startup-file defines several useful words, so running without it is a little annoying but it isn't impossible.
+
+
+## Embedded Usage
+
+Although this is a minimal interpreter it _can_ be embedded within a Golang host-application, allowing users to write scripts to control it.
+
+As an example of this I put together a simple demo:
+
+* [https://github.com/skx/turtle](https://github.com/skx/turtle)
+
+This embeds the interpreter within an application, and defines some new words to allow the user to create graphics - in the style of [turtle](https://en.wikipedia.org/wiki/Turtle_graphics).
+
 
 
 ## Anti-Features
