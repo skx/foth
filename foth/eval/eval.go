@@ -966,7 +966,7 @@ func (e *Eval) printNumber(n float64) {
 	for strings.HasSuffix(output, "0") {
 		output = strings.TrimSuffix(output, "0")
 	}
-	e.printString(fmt.Sprintf("%s", output))
+	e.printString(output)
 }
 
 // printString outputs a string - replacing "\n", etc, with the
