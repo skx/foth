@@ -135,6 +135,15 @@ variable val
 \
 : stars dup 0 > if 0 do star loop else drop then ;
 
+
+\
+\ `space` and `spaces` are similar to the previous words,
+\ except they print space(s) instead of stars.
+\
+: space ' ' emit ;
+: spaces dup 0 > if 0 do space loop else drop then ;
+
+
 \
 \ Squares: Draw a square of stars
 \
