@@ -376,7 +376,7 @@ I found this page useful, it also documents `invert` which I added for completen
 The final version, stored beneath [foth/](foth/), is pretty similar to the previous part from an end-user point of view, however there have been a lot of changes behind the scenes:
 
 * We've added near 100% test-coverage.
-* We've added a simple [lexer/](lexer/) to tokenize our input.
+* We've added a simple [lexer/](foth/lexer/) to tokenize our input.
   * This was required to allow us to ignore comments, and handle string literals.
   * Merely splitting input-strings at whitespace characters would have made either of those impossible to handle correctly.
 * The `if` handling has been updated to support an `else`-branch, the general form is now:
