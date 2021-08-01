@@ -46,7 +46,7 @@ go build .
   * If the token matches the name of one of the defined Words
     * And there is a (go) function-pointer, then call it.
     * Otherwise assume there is a list of `Word` indexes.  Call each one in turn.
-    * Otherwise assume the input is a number, and push to the stack.
+  * Otherwise assume the input is a number, and push to the stack.
 * When in compiling mode we instead lookup each input word and just store the offset of the found `Word` in the internal space for the new Word
   * Once we hit `;` we add this new word to the dictionary of known-words
 * [main.go](main.go) just reads STDIN, line by line, and passes to the evaluator
