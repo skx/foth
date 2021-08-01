@@ -15,7 +15,7 @@ If you recall from [part3](../part3/):
   * When `;` is encountered we flip that switch off.
 * When compiling we use a _temporary_ storage, and instead of executing words once we've found them we merely append their offsets to the list of words in this new definition.
 
-The problem we found is that when the user entered a number in their new definition there was nothing we could do with it - adding it to the stack would be the wrong thing to do, and we couldn't add it to the word-defition.
+The problem we found is that when the user entered a number in their new definition there was nothing we could do with it - adding it to the stack would be the wrong thing to do, and we couldn't add it to the word-definition.
 
 We've updated things now so that the list of references to pre-existing words can store numbers too!  We add a magic "opcode", -1, and then add the number itself.
 
