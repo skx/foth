@@ -68,7 +68,7 @@ When we implement that we have to have this in our definition:
     XXX          \ jumps to the specified offset.
      do
      stuff
-  XXX:
+    XXX:
 
 Here we're using `-3` as the magic opcode to mean "pop a value from the stack, and if the value is zero we jump to the specified offset in our word-list.
 
