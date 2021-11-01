@@ -17,8 +17,6 @@ This is our final version of the code.  Compared to the previous revision it has
 
 ## Building
 
-## Building
-
 To build, and run this version:
 
 ```
