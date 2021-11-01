@@ -83,7 +83,7 @@ Or clone this repository, and build the executable like so:
 ```
 cd foth
 go build .
-./fofh
+./foth
 ```
 
 The executable will try to load [foth.4th](foth/foth.4th) from the current-directory, so you'll want to fetch that too.  But otherwise it should work as you'd expect - the startup-file defines several useful words, so running without it is a little annoying but it isn't impossible.
@@ -376,7 +376,7 @@ I found this page useful, it also documents `invert` which I added for completen
 The final version, stored beneath [foth/](foth/), is pretty similar to the previous part from an end-user point of view, however there have been a lot of changes behind the scenes:
 
 * We've added near 100% test-coverage.
-* We've added a simple [lexer/](foth/lexer/) to tokenize our input.
+* We've added a simple [lexer](foth/lexer/) to tokenize our input.
   * This was required to allow us to ignore comments, and handle string literals.
   * Merely splitting input-strings at whitespace characters would have made either of those impossible to handle correctly.
 * The `if` handling has been updated to support an `else`-branch, the general form is now:
@@ -400,7 +400,7 @@ The final version, stored beneath [foth/](foth/), is pretty similar to the previ
   * e.g. `abs`, `even?`, `negate`, `odd?`,
 * Removed all calls to `os.Exit()`
   * We now return `error` objects where appropriate, allowing the caller to detect problems.
-* It is now possible to redefining existing words.
+* It is now possible to redefine existing words.
 * Execute any files specified on the command line.
   * If no files are specified run the REPL.
 
