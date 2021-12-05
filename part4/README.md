@@ -49,7 +49,7 @@ go build .
   * If the token matches the name of one of the defined Words
     * And there is a (go) function-pointer, then call it.
     * Otherwise assume there is a list of `Word` indexes:
-      * But if we see the magic flag `-1` then the next number is a number to push to the flag.
+      * But if we see the magic flag `-1` then the next number is a number to push to the stack.
   * Otherwise assume the input is a number, and push to the stack.
 * When in compiling mode we instead lookup each input word and just store the offset of the found `Word` in the internal space for the new Word.
   * If that fails then we assume the user entered a number, and add it to the word-array (prefixed by `-1`).
