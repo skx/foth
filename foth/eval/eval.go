@@ -522,7 +522,7 @@ func (e *Eval) compileToken(token lexer.Token) error {
 		//
 		// Conditional support is a bit nasty.
 		//
-		// Basically we expect to allow someone to writ
+		// Basically we expect to allow someone to write
 		// something like:
 		//
 		//  : foo 0 < if neg else pos then
