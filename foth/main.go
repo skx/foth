@@ -50,10 +50,8 @@ func doInit(eval *eval.Eval, path string) error {
 		line, err = reader.ReadString(byte('\n'))
 	}
 
-	if err != nil {
-		if err != io.EOF {
-			return err
-		}
+	if err != io.EOF {
+		return err
 	}
 
 	err = handle.Close()
