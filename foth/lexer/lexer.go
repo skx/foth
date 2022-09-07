@@ -74,7 +74,7 @@ func (l *Lexer) Tokens() ([]Token, error) {
 				// confirm we have a close
 				if string(l.input[offset+2]) == "'" {
 
-					c := l.input[offset+1]
+					c = l.input[offset+1]
 					d := int(c)
 					s := fmt.Sprintf("%d", d)
 					res = append(res, Token{Name: s})
