@@ -65,6 +65,8 @@ The end-result of this work is a simple scripting-language which you could easil
   * If no arguments are supplied run a simple REPL instead.
 * A standard library is loaded, from the present directory, if it is present.
   * See what we load by default in [foth/foth.4th](foth/foth.4th).
+* The use of recursive definitions, for example:
+  * `: factorial recursive  dup 1 >  if  dup 1 -  factorial *  then  ;`
 
 
 ## Installation
@@ -403,6 +405,8 @@ The final version, stored beneath [foth/](foth/), is pretty similar to the previ
 * It is now possible to redefine existing words.
 * Execute any files specified on the command line.
   * If no files are specified run the REPL.
+* We've added support for recursive definitions, in #16 for example allowing:
+  * `: factorial recursive  dup 1 >  if  dup 1 -  factorial *  then  ;`
 
 See [foth/](foth/) for the implementation.
 
