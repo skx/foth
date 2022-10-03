@@ -59,6 +59,9 @@ type Word struct {
 
 	// Does this word end us from immediate-mode?
 	EndImmediate bool
+
+	// Does this word recurse?
+	Recursive bool
 }
 
 // Eval is our evaluation structure, which holds state of where
@@ -383,12 +386,11 @@ func (e *Eval) SetWriter(writer *bufio.Writer) {
 //
 // This is called in two ways:
 //
-//  1.  To compile a new word.
+//  1. To compile a new word.
 //
-//  2.  In "immediate" mode.  Where we compile a fake word,
+//  2. In "immediate" mode.  Where we compile a fake word,
 //     with an impossible name (`$ $`), with the expectation
 //     we'll then immediately execute it.
-//
 func (e *Eval) compileToken(token lexer.Token) error {
 
 	tok := token.Name
@@ -443,6 +445,11 @@ func (e *Eval) compileToken(token lexer.Token) error {
 		return nil
 	}
 
+	if tok == "recursive" {
+		e.tmp.Recursive = true
+		return nil
+	}
+
 	// Is the user adding an existing word to the definition?
 	idx := e.findWord(tok)
 	if idx >= 0 {
@@ -475,7 +482,6 @@ func (e *Eval) compileToken(token lexer.Token) error {
 		//
 		// Horrid
 		//
-
 		// If the word was a "DO"
 		if tok == "do" {
 
@@ -645,16 +651,21 @@ func (e *Eval) compileToken(token lexer.Token) error {
 		return nil
 	}
 
+	// Convert to float
+	val, err := strconv.ParseFloat(tok, 64)
+	if err != nil {
+
+		if e.tmp.Recursive {
+			e.tmp.Words = append(e.tmp.Words, float64(len(e.Dictionary)))
+			return nil
+		}
+		return fmt.Errorf("22 failed to convert %s to number %s", tok, err.Error())
+	}
+
 	// At this point we assume the user entered a number
 	// so we save a magic "-1" flag in our
 	// definition, and then the number itself
 	e.tmp.Words = append(e.tmp.Words, -1)
-
-	// Convert to float
-	val, err := strconv.ParseFloat(tok, 64)
-	if err != nil {
-		return fmt.Errorf("22 failed to convert %s to number %s", tok, err.Error())
-	}
 	e.tmp.Words = append(e.tmp.Words, val)
 
 	return nil
@@ -720,30 +731,29 @@ func (e *Eval) dumpWord(idx int) {
 //
 // * Functions might contain a pointer to a function implemented in go.
 //
-//   If so we just call that pointer.
+//		If so we just call that pointer.
 //
-// * Functions will otherwise have lists of numbers, which point to
-//   previously defined words.
+//	  - Functions will otherwise have lists of numbers, which point to
+//	    previously defined words.
 //
-//   In addition to the pointers to previously-defined words there are
-//   also some special values:
+//	    In addition to the pointers to previously-defined words there are
+//	    also some special values:
 //
-//    "-1" means the next value is a number
+//	    "-1" means the next value is a number
 //
-//    "-3" is a conditional-jump, which will change our IP if
-//         the topmost item on the stack is "0".
+//	    "-3" is a conditional-jump, which will change our IP if
+//	    the topmost item on the stack is "0".
 //
-//    "-4" is an unconditional jump, which will change our IP
+//	    "-4" is an unconditional jump, which will change our IP
 //
-//    "-5" prints a string, stored in our literal-area.
-//         Dynamic strings are not supported.
+//	    "-5" prints a string, stored in our literal-area.
+//	    Dynamic strings are not supported.
 //
-//    "-10" creates a new Loop structure.
-//          (i.e. `do`).
+//	    "-10" creates a new Loop structure.
+//	    (i.e. `do`).
 //
-//    "-11" handles the test/termination of a loop condition.
-//          (i.e. `loop`).
-//
+//	    "-11" handles the test/termination of a loop condition.
+//	    (i.e. `loop`).
 func (e *Eval) evalWord(index int) error {
 
 	// Lookup the word in our dictionary.
