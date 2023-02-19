@@ -674,6 +674,12 @@ func (e *Eval) compileToken(token lexer.Token) error {
 // dumpWord dumps the definition of the given word.
 func (e *Eval) dumpWord(idx int) {
 
+	// Ensure we have a valid index
+	if idx >= len(e.Dictionary) || idx < 0 {
+		fmt.Printf("Invalid index\n")
+		return
+	}
+
 	// Lookup the word
 	word := e.Dictionary[idx]
 
