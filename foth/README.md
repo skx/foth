@@ -6,6 +6,7 @@ This is our final version of the code.  Compared to the previous revision it has
   * We've added test-cases to __everything__.
 * We implement a lot of new primitives.
   * In [eval/builtins.go](eval/builtins.go).
+  * And a `quit` word in the REPL, or scripts, which is hardcoded outside the builtin-package.
   * And also in a new file loaded at startup: [foth.4th](foth.4th).
 * We've reworked our implementation to be a bit more idiomatic go.
 * We've improved a lot of implementation details:
@@ -13,6 +14,7 @@ This is our final version of the code.  Compared to the previous revision it has
     * `do`/`loop` can now be nested too.
   * `if`/`else`/`then` work now.
     * If you recall in [part6](../part6/) we didn't support an else-branch.
+
 
 
 ## Building
@@ -23,6 +25,7 @@ To build, and run this version:
 go build .
 ./foth
 ```
+
 
 
 ## Implementation

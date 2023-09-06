@@ -3,6 +3,7 @@ package eval
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -127,6 +128,13 @@ type Eval struct {
 	// Are we currently defining a variable?
 	defining bool
 }
+
+var (
+	// ErrQuit will be used to handle a QUIT from the REPL.
+	//
+	// It should be expected as a normal, non-fatal, error from the Eval function.
+	ErrQuit = errors.New("RETURN")
+)
 
 // New returns a simple evaluator, which will allow executing forth-like words.
 func New() *Eval {
@@ -269,6 +277,11 @@ func (e *Eval) Eval(input string) error {
 		if tok == ".\"" {
 			e.printString(token.Value)
 			continue
+		}
+
+		// Quit is also special-cased.
+		if tok == "quit" {
+			return ErrQuit
 		}
 
 		// Lookup this word from our dictionary
