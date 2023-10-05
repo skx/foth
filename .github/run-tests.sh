@@ -4,6 +4,10 @@
 go install golang.org/x/lint/golint@master
 go install honnef.co/go/tools/cmd/staticcheck@master
 
+
+# I don't even ..
+go env -w GOFLAGS="-buildvcs=false"
+
 # Run the static-check tool
 for i in */; do
     echo "Running golint on $i"
