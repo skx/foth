@@ -1,8 +1,11 @@
 #!/bin/bash
 
+# I don't even ..
+go env -w GOFLAGS="-buildvcs=false"
+
 # Install tools to test our code-quality.
-go get -u golang.org/x/lint/golint
-go get -u honnef.co/go/tools/cmd/staticcheck
+go install golang.org/x/lint/golint@master
+go install honnef.co/go/tools/cmd/staticcheck@master
 
 # Run the static-check tool
 for i in */; do
