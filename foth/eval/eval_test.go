@@ -19,6 +19,15 @@ func TestBasic(t *testing.T) {
 		t.Fatalf("expected error, got none")
 	}
 
+	// quit
+	out = e.Eval("quit")
+	if out == nil {
+		t.Fatalf("expected error, got none")
+	}
+	if out != ErrQuit {
+		t.Fatalf("got error, but the wrong one")
+	}
+
 	// nested-comments
 	out = e.Eval(" ( one ( two ) ) ")
 	if out == nil {
@@ -113,6 +122,10 @@ func TestError(t *testing.T) {
 		// else/then without an if
 		": foo else ; foo",
 		": foo then ; foo",
+
+		// unterminated strings
+		".\" this is long",
+		"\" this is long",
 	}
 
 	for _, test := range tests {
@@ -455,4 +468,41 @@ func TestSetWriter(t *testing.T) {
 	if b.String() != "Steve\nKemp" {
 		t.Fatalf("STDOUT didn't match, got '%s'", b.String())
 	}
+}
+
+func TestStrlenEval(t *testing.T) {
+
+	type Test struct {
+		input  string
+		result float64
+	}
+
+	tests := []Test{
+		{input: "\"steve\" strlen", result: 5},
+		{input: ": foo .\"steve\" 3 ; foo ", result: 3},
+		{input: ": bar \"steve\" strlen ; bar ", result: 5},
+		{input: ": factorial recursive  dup 1 > if dup 1 - factorial *  then  ; 6 factorial", result: 720},
+	}
+
+	for _, test := range tests {
+
+		e := New()
+		e.debug = true
+		err := e.Eval(test.input)
+		if err != nil {
+			t.Fatalf("unexpected error processing '%s': %s", test.input, err.Error())
+		}
+
+		ret, err2 := e.Stack.Pop()
+		if err2 != nil {
+			t.Fatalf("failed to get stack value from %s", test.input)
+		}
+		if !e.Stack.IsEmpty() {
+			t.Fatalf("%s: expected stack to be empty", test.input)
+		}
+		if ret != test.result {
+			t.Fatalf("%s: %f got %f", test.input, test.result, ret)
+		}
+	}
+
 }
