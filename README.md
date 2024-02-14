@@ -376,9 +376,11 @@ I found this page useful, it also documents `invert` which I added for completen
 
 This update adds a basic level of support for strings.
 
-* When a string is encountered it is stored in "memory".
-* The address of the string is pushed to the stack.
-* Two new words are added:
+* When we see a string we store it in an array of strings.
+* We then push the offset of the new string entry onto the stack.
+* This allows it to be referenced and used.
+* Three new words are added:
+  * `strings` Return the number of strings we've seen/stored.
   * `strlen` show the length of the string at the given address.
   * `strprn` print the string at the given address.
 
