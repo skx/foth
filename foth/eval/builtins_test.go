@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"os"
 	"testing"
 )
 
@@ -734,6 +735,113 @@ func TestSetVar(t *testing.T) {
 		t.Fatalf("value mismatch after setting variable")
 	}
 
+}
+
+// strings counts the string literals, and will return
+// a number on the stack
+func TestStrings(t *testing.T) {
+
+	e := New()
+
+	// Empty stack on first start
+	n := e.Stack.Len()
+	if n != 0 {
+		t.Fatalf("failing result for stringCount, got %d", n)
+	}
+
+	// call the function
+	err := e.stringCount()
+	if err != nil {
+		t.Fatalf("unexpected error with stringCount %s", err.Error())
+	}
+
+	n = e.Stack.Len()
+	if n != 1 {
+		t.Fatalf("failing result for stringCount, got %d", n)
+		os.Exit(1)
+	}
+}
+
+func TestStrlen(t *testing.T) {
+
+	e := New()
+	e.strings = append(e.strings, "Steve")
+
+	// call the function
+	err := e.strlen()
+	if err == nil {
+		t.Fatalf("expected an error, got none")
+	}
+
+	// Empty stack on first start
+	n := e.Stack.Len()
+	if n != 0 {
+		t.Fatalf("failing result for strlen, got %d", n)
+	}
+
+	// push an invalid string
+	e.Stack.Push(100.0)
+
+	// call the function
+	err = e.strlen()
+	if err == nil {
+		t.Fatalf("expected an error, got none")
+	}
+
+	// Now try to get the length of Steve
+	e.Stack.Push(0.0)
+	err = e.strlen()
+	if err != nil {
+		t.Fatalf("unexpected error, calling strlen %s", err.Error())
+	}
+
+	// Is the result expected?
+	x, _ := e.Stack.Pop()
+	if x != 5 {
+		t.Fatalf("wrong result for strlen, got %f", x)
+	}
+}
+
+func TestStrPrn(t *testing.T) {
+
+	e := New()
+
+	// We want to avoid spamming stdout, so our string to print is "empty"
+	e.strings = append(e.strings, "")
+
+	// call the function
+	err := e.strprn()
+	if err == nil {
+		t.Fatalf("expected an error, got none")
+	}
+
+	// Empty stack on first start
+	n := e.Stack.Len()
+	if n != 0 {
+		t.Fatalf("failing result for strprn, got %d", n)
+	}
+
+	// push an invalid string
+	e.Stack.Push(100.0)
+
+	// call the function
+	err = e.strprn()
+	if err == nil {
+		t.Fatalf("expected an error, got none")
+	}
+
+	// Now try to get the length of Steve
+	e.Stack.Push(0.0)
+	err = e.strprn()
+	if err != nil {
+		t.Fatalf("unexpected error, calling strprn %s", err.Error())
+	}
+
+	// Empty stack, still?
+	n = e.Stack.Len()
+	if n != 0 {
+		t.Fatalf("failing result for strprn, got %d", n)
+	}
 }
 
 func TestSub(t *testing.T) {
