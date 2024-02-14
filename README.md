@@ -16,11 +16,14 @@
     * [Part 4](#part-4) - Allow defining improved words via the REPL.
     * [Part 5](#part-5) - Allow executing loops via `do`/`loop`.
     * [Part 6](#part-6) - Allow conditional execution via `if`/`then`.
+    * [Part 7](#part-7) - Added minimal support for strings.
     * [Final Revision](#final-revision) - Idiomatic Go, test-cases, and many new words
   * [BUGS](#bugs)
     * [loops](#loops) - zero expected-iterations actually runs once
   * [See Also](#see-also)
   * [Github Setup](#github-setup)
+
+
 
 
 # foth
@@ -69,6 +72,7 @@ The end-result of this work is a simple scripting-language which you could easil
   * `: factorial recursive  dup 1 >  if  dup 1 -  factorial *  then  ;`
 
 
+
 ## Installation
 
 You can find binary releases of the final-version upon the [project release page](https://github.com/skx/foth/releases), but if you prefer you can install from source easily.
@@ -89,6 +93,7 @@ go build .
 ```
 
 The executable will try to load [foth.4th](foth/foth.4th) from the current-directory, so you'll want to fetch that too.  But otherwise it should work as you'd expect - the startup-file defines several useful words, so running without it is a little annoying but it isn't impossible.
+
 
 
 ## Embedded Usage
@@ -114,6 +119,7 @@ Basically we ignore the common FORTH-approach of using a return-stack, and imple
 * So we implement `if` or `do`/`loop` in a hard-coded fashion.
   * That means we can't allow a user to define `while`, or similar.
   * But otherwise our language is flexible enough to allow _real_ work to be done with it.
+
 
 
 ## Implementation Approach
@@ -174,7 +180,6 @@ with the ability to print the top-most entry of the stack:
 See [part1/](part1/) for details.
 
 
-
 ### Part 2
 
 Part two allows the definition of new words in terms of existing ones,
@@ -196,7 +201,6 @@ squares the number at the top of the stack.
      ^D
 
 See [part2/](part2/) for details.
-
 
 
 ### Part 3
@@ -222,7 +226,6 @@ See [part3/](part3/) for details.
 **NOTE**: We don't support using numbers in definitions, yet.  That will come in part4!
 
 
-
 ### Part 4
 
 Part four allows the user to define their own words, including the use of numbers, from within the REPL.  Here the magic is handling the input of numbers when in "compiling mode".
@@ -240,7 +243,6 @@ To support this we switched our `Words` array from `int` to `float64`, specifica
      ^D
 
 See [part4/](part4/) for details.
-
 
 
 ### Part 5
@@ -292,7 +294,6 @@ So to write out numbers you could try something like this, using `dup` to duplic
      0123456789>
 
 See [part5/](part5/) for details.
-
 
 
 ### Part 6
@@ -371,6 +372,29 @@ I found this page useful, it also documents `invert` which I added for completen
 * https://www.forth.com/starting-forth/4-conditional-if-then-statements/
 
 
+### Part 7
+
+This update adds a basic level of support for strings.
+
+* When a string is encountered it is stored in "memory".
+* The address of the string is pushed to the stack.
+* Two new words are added:
+  * `strlen` show the length of the string at the given address.
+  * `strprn` print the string at the given address.
+
+Sample usage:
+
+    cd part7
+    go build .
+    ./part7
+    > : steve "steve" ;
+    > steve strlen .
+    5
+    > steve strprn .
+    steve
+    ^D
+
+See [part7/](part7/) for the code.
 
 
 ### Final Revision
@@ -416,6 +440,7 @@ See [foth/](foth/) for the implementation.
 
 A brief list of known-issues:
 
+
 ### Loops
 
 The handling of loops isn't correct when there should be zero-iterations:
@@ -439,6 +464,7 @@ value before we proceed, only running the loop if the value is non-zero.
 
 
 
+
 # See Also
 
 This repository was put together after [experimenting with a scripting language](https://github.com/skx/monkey/), an [evaluation engine](https://github.com/skx/evalfilter/), putting together a [TCL-like scripting language](https://github.com/skx/critical), writing a [BASIC interpreter](https://github.com/skx/gobasic) and creating [yet another lisp](https://github.com/skx/yal).
@@ -449,6 +475,7 @@ I've also played around with a couple of compilers which might be interesting to
   * [https://github.com/skx/bfcc/](https://github.com/skx/bfcc/)
 * A math-compiler:
   * [https://github.com/skx/math-compiler](https://github.com/skx/math-compiler)
+
 
 
 
