@@ -141,7 +141,7 @@ func TestString(t *testing.T) {
 	if out[1].Name != ".\"" {
 		t.Fatalf("got bad string")
 	}
-	if out[1].Value != "foo bar baz" {
+	if out[1].Value != " foo bar baz " {
 		t.Fatalf("got bad string: '%s'", out[1].Value)
 	}
 	if out[2].Name != "end" {
@@ -165,7 +165,7 @@ func TestString2(t *testing.T) {
 	if out[1].Name != "\"" {
 		t.Fatalf("got bad string")
 	}
-	if out[1].Value != "foo bar baz" {
+	if out[1].Value != " foo bar baz " {
 		t.Fatalf("got bad string: '%s'", out[1].Value)
 	}
 	if out[2].Name != "end" {

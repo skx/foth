@@ -1022,10 +1022,6 @@ func (e *Eval) printNumber(n float64) {
 // real codes.
 func (e *Eval) printString(str string) {
 
-	str = strings.ReplaceAll(str, "\\n", "\n")
-	str = strings.ReplaceAll(str, "\\t", "\t")
-	str = strings.ReplaceAll(str, "\\r", "\r")
-
 	if e.STDOUT == nil {
 		e.STDOUT = bufio.NewWriter(os.Stdout)
 	}

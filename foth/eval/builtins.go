@@ -269,7 +269,7 @@ func (e *Eval) setVar() error {
 
 func (e *Eval) stackDump() error {
 	l := e.Stack.Len()
-	e.printString(fmt.Sprintf("<%d> ", l))
+	e.printString(fmt.Sprintf("<len:%d> ", l))
 
 	c := 0
 	for c < l {
@@ -327,7 +327,7 @@ func (e *Eval) strprn() error {
 
 	if i < len(e.strings) {
 		str := e.strings[i]
-		fmt.Printf("%s", str)
+		e.printString(str)
 		return nil
 	}
 

@@ -460,7 +460,7 @@ func TestSetWriter(t *testing.T) {
 
 	// Finally a string literal
 	b.Reset()
-	err = e.Eval(".\" Steve\nKemp \"")
+	err = e.Eval(".\"Steve\nKemp\"")
 	if err != nil {
 		t.Fatalf("unexpected error")
 	}

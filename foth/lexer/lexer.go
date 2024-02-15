@@ -3,7 +3,6 @@ package lexer
 
 import (
 	"fmt"
-	"strings"
 )
 
 // Token is a single token.
@@ -24,6 +23,9 @@ type Lexer struct {
 
 	// input is the string we were given
 	input string
+
+	// offset points to the character we're currently looking at
+	offset int
 }
 
 // New creates a new lexer which allows parsing a string of FORTH tokens
@@ -38,14 +40,14 @@ func (l *Lexer) Tokens() ([]Token, error) {
 	var res []Token
 
 	// We walk the input from start to finish
-	offset := 0
+	l.offset = 0
 
 	// Value of the current token - built up character by character.
 	cur := ""
 
-	for offset < len(l.input) {
+	for l.offset < len(l.input) {
 
-		c := l.input[offset]
+		c := l.input[l.offset]
 		switch string(c) {
 
 		case " ", "\n", "\r", "\t":
@@ -58,27 +60,27 @@ func (l *Lexer) Tokens() ([]Token, error) {
 
 		case "\\":
 			// Comment to the end of the line
-			for offset < len(l.input) {
-				if l.input[offset] == '\n' {
+			for l.offset < len(l.input) {
+				if l.input[l.offset] == '\n' {
 					break
 				}
-				offset++
+				l.offset++
 			}
 
 		case "'":
 			// We parse 'x' as the ASCII code of the character x.
 
 			// can we peek ahead two characters?
-			if offset+2 < len(l.input) {
+			if l.offset+2 < len(l.input) {
 
 				// confirm we have a close
-				if string(l.input[offset+2]) == "'" {
+				if string(l.input[l.offset+2]) == "'" {
 
-					c = l.input[offset+1]
+					c = l.input[l.offset+1]
 					d := int(c)
 					s := fmt.Sprintf("%d", d)
 					res = append(res, Token{Name: s})
-					offset += 2
+					l.offset += 2
 				} else {
 					return res, fmt.Errorf("syntax error")
 				}
@@ -89,22 +91,22 @@ func (l *Lexer) Tokens() ([]Token, error) {
 		case "(":
 
 			// skip the "("
-			offset++
+			l.offset++
 
 			// Eat the comment - which is everything
 			// between the "(" and ")" (inclusive)
 			//
 			// NOTE: Nested comments are prohibited
 			closed := false
-			for offset < len(l.input) {
-				if l.input[offset] == ')' {
+			for l.offset < len(l.input) {
+				if l.input[l.offset] == ')' {
 					closed = true
 					break
 				}
-				if l.input[offset] == '(' {
+				if l.input[l.offset] == '(' {
 					return res, fmt.Errorf("nested comments are illegal")
 				}
-				offset++
+				l.offset++
 			}
 			if !closed {
 				return res, fmt.Errorf("unterminated comment")
@@ -114,102 +116,34 @@ func (l *Lexer) Tokens() ([]Token, error) {
 		case "\"":
 
 			// skip the opening """
-			offset++
+			l.offset++
 
-			// We're now inside the string
-			closed := false
-			val := ""
-			for offset < len(l.input) {
-				c := l.input[offset]
-
-				if c == '"' {
-					closed = true
-					offset++
-					break
-				}
-
-				// Handle \n, etc.
-				if c == '\\' {
-
-					// if there is another character
-					if offset+1 < len(l.input) {
-
-						// look at what it is
-						offset++
-						c := l.input[offset]
-
-						if c == 'n' {
-							c = '\n'
-						}
-						if c == 'r' {
-							c = '\r'
-						}
-						if c == 't' {
-							c = '\t'
-						}
-						if c == '"' {
-							c = '"'
-						}
-						if c == '\\' {
-							c = '\\'
-						}
-
-						val += string(c)
-						offset++
-						continue
-					}
-				}
-
-				// default
-				val += string(l.input[offset])
-				offset++
+			// Read the string, handling control-characters & etc
+			str, err := l.readString()
+			if err != nil {
+				return nil, err
 			}
 
-			// Failed to close the string?
-			if !closed {
-				return res, fmt.Errorf("unterminated string")
-			}
-
-			// Otherwise save it away
-			val = strings.TrimSpace(val)
-			res = append(res, Token{Name: "\"", Value: val})
+			res = append(res, Token{Name: "\"", Value: str})
 
 			// This is for ." xxx "
 		case ".":
 
 			// ensure we don't walk off the array
-			if offset+1 < len(l.input) {
+			if l.offset+1 < len(l.input) {
 
 				// next character is a string?
-				if l.input[offset+1] == '"' {
+				if l.input[l.offset+1] == '"' {
 
-					// skip the "."
-					offset++
+					l.offset += 2
 
-					// skip the opening """
-					offset++
-
-					// We're now inside the string
-					closed := false
-					val := ""
-					for offset < len(l.input) {
-						if l.input[offset] == '"' {
-							closed = true
-							break
-						} else {
-							val += string(l.input[offset])
-						}
-						offset++
+					// Read the string, handling control-characters & etc
+					str, err := l.readString()
+					if err != nil {
+						return nil, err
 					}
 
-					// Failed to close the string?
-					if !closed {
-						return res, fmt.Errorf("unterminated string")
-					}
-
-					// Otherwise save it away
-					val = strings.TrimSpace(val)
-					res = append(res, Token{Name: ".\"", Value: val})
+					res = append(res, Token{Name: ".\"", Value: str})
 				} else {
 					cur = cur + "."
 				}
@@ -219,7 +153,7 @@ func (l *Lexer) Tokens() ([]Token, error) {
 		default:
 			cur = cur + string(c)
 		}
-		offset++
+		l.offset++
 	}
 
 	// end token?
@@ -229,4 +163,68 @@ func (l *Lexer) Tokens() ([]Token, error) {
 
 	// All done.
 	return res, nil
+}
+
+// readString is called to read until a close of the string
+// is encountered.  (i.e. ").
+func (l *Lexer) readString() (string, error) {
+
+	// We're now inside a string
+	closed := false
+	val := ""
+
+	for l.offset < len(l.input) {
+
+		c := l.input[l.offset]
+
+		if c == '"' {
+			closed = true
+			l.offset++
+			break
+		}
+
+		// Handle \n, etc.
+		if c == '\\' {
+
+			// if there is another character
+			if l.offset+1 < len(l.input) {
+
+				// look at what it is
+				l.offset++
+				c := l.input[l.offset]
+
+				if c == 'n' {
+					c = '\n'
+				}
+				if c == 'r' {
+					c = '\r'
+				}
+				if c == 't' {
+					c = '\t'
+				}
+				if c == '"' {
+					c = '"'
+				}
+				if c == '\\' {
+					c = '\\'
+				}
+
+				val += string(c)
+				l.offset++
+				continue
+			}
+		}
+
+		// default
+		val += string(l.input[l.offset])
+		l.offset++
+	}
+
+	// Failed to close the string?
+	if !closed {
+		return val, fmt.Errorf("unterminated string")
+	}
+
+	// Returned okay
+	return val, nil
 }
