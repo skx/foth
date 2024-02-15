@@ -110,6 +110,71 @@ func (l *Lexer) Tokens() ([]Token, error) {
 				return res, fmt.Errorf("unterminated comment")
 			}
 
+			// This is for strings
+		case "\"":
+
+			// skip the opening """
+			offset++
+
+			// We're now inside the string
+			closed := false
+			val := ""
+			for offset < len(l.input) {
+				c := l.input[offset]
+
+				if c == '"' {
+					closed = true
+					offset++
+					break
+				}
+
+				// Handle \n, etc.
+				if c == '\\' {
+
+					// if there is another character
+					if offset+1 < len(l.input) {
+
+						// look at what it is
+						offset++
+						c := l.input[offset]
+
+						if c == 'n' {
+							c = '\n'
+						}
+						if c == 'r' {
+							c = '\r'
+						}
+						if c == 't' {
+							c = '\t'
+						}
+						if c == '"' {
+							c = '"'
+						}
+						if c == '\\' {
+							c = '\\'
+						}
+
+						val += string(c)
+						offset++
+						continue
+					}
+				}
+
+				// default
+				val += string(l.input[offset])
+				offset++
+			}
+
+			// Failed to close the string?
+			if !closed {
+				return res, fmt.Errorf("unterminated string")
+			}
+
+			// Otherwise save it away
+			val = strings.TrimSpace(val)
+			res = append(res, Token{Name: "\"", Value: val})
+
+			// This is for ." xxx "
 		case ".":
 
 			// ensure we don't walk off the array

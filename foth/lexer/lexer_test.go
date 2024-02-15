@@ -82,6 +82,22 @@ func TestCommentNested(t *testing.T) {
 	}
 }
 
+// Escape characters
+func TestEscapeCharacters(t *testing.T) {
+
+	l := New("\"hello\\n\\r\\t\\r\\\"\\\\steve\"")
+
+	toks, err := l.Tokens()
+	if err != nil {
+		t.Fatalf("unexpected error %s", err.Error())
+	}
+
+	expect := "hello\n\r\t\r\"\\steve"
+	if toks[0].Value != expect {
+		t.Fatalf("unexpected value for string; got '%s' not '%s'", toks[0].Value, expect)
+	}
+}
+
 // Unterminated comments are a bug
 func TestCommentUnterminated(t *testing.T) {
 
@@ -134,10 +150,48 @@ func TestString(t *testing.T) {
 
 }
 
+func TestString2(t *testing.T) {
+
+	l := New("start \" foo bar baz \" end")
+	out, err := l.Tokens()
+
+	if err != nil {
+		t.Fatalf("error lexing")
+	}
+
+	if out[0].Name != "start" {
+		t.Fatalf("got bad prefix")
+	}
+	if out[1].Name != "\"" {
+		t.Fatalf("got bad string")
+	}
+	if out[1].Value != "foo bar baz" {
+		t.Fatalf("got bad string: '%s'", out[1].Value)
+	}
+	if out[2].Name != "end" {
+		t.Fatalf("got bad suffix")
+	}
+
+}
+
 // Unterminated strings are a bug
 func TestStringUnterminated(t *testing.T) {
 
 	l := New("  .\" string here ")
+
+	_, err := l.Tokens()
+	if err == nil {
+		t.Fatalf("expected error, but got none")
+	}
+	if !strings.Contains(err.Error(), "unterminated string") {
+		t.Fatalf("got an error, but the wrong one")
+	}
+}
+
+// Unterminated strings are a bug
+func TestStringUnterminated2(t *testing.T) {
+
+	l := New("  \" string here ")
 
 	_, err := l.Tokens()
 	if err == nil {

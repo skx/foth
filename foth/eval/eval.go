@@ -210,6 +210,11 @@ func New() *Eval {
 		{Name: ";", Function: e.nop},
 		{Name: "dump", Function: e.dump},
 		{Name: "words", Function: e.words},
+
+		// strings
+		{Name: "strings", Function: e.stringCount},
+		{Name: "strlen", Function: e.strlen},
+		{Name: "strprn", Function: e.strprn},
 	}
 
 	return e
@@ -312,6 +317,13 @@ func (e *Eval) Eval(input string) error {
 			idx = e.findVariable(tok)
 			if idx >= 0 {
 				e.Stack.Push(float64(idx))
+				continue
+			}
+
+			// String
+			if token.Name == "\"" {
+				e.strings = append(e.strings, token.Value)
+				e.Stack.Push(float64(len(e.strings) - 1))
 				continue
 			}
 
@@ -531,7 +543,7 @@ func (e *Eval) compileToken(token lexer.Token) error {
 
 		}
 
-		// output a string, in compiled form
+		// output a string-print operation, in compiled form
 		if token.Name == ".\"" {
 			e.strings = append(e.strings, token.Value)
 			e.tmp.Words = append(e.tmp.Words, -5)
@@ -661,6 +673,14 @@ func (e *Eval) compileToken(token lexer.Token) error {
 		// the offset of the variable onto the stack
 		e.tmp.Words = append(e.tmp.Words, -1)
 		e.tmp.Words = append(e.tmp.Words, float64(idx))
+		return nil
+	}
+
+	// save a string, in compiled form
+	if token.Name == "\"" {
+		e.strings = append(e.strings, token.Value)
+		e.tmp.Words = append(e.tmp.Words, -1)
+		e.tmp.Words = append(e.tmp.Words, float64(len(e.strings))-1)
 		return nil
 	}
 

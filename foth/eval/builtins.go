@@ -290,6 +290,50 @@ func (e *Eval) startDefinition() error {
 	return nil
 }
 
+// strings
+func (e *Eval) stringCount() error {
+	// Return the number of strings we've seen
+	e.Stack.Push(float64(len(e.strings)))
+	return nil
+}
+
+// strlen
+func (e *Eval) strlen() error {
+	addr, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+
+	i := int(addr)
+
+	if i < len(e.strings) {
+		str := e.strings[i]
+		e.Stack.Push(float64(len(str)))
+		return nil
+	}
+
+	return fmt.Errorf("invalid stack offset for string reference")
+
+}
+
+// strprn - string printing
+func (e *Eval) strprn() error {
+	addr, err := e.Stack.Pop()
+	if err != nil {
+		return err
+	}
+
+	i := int(addr)
+
+	if i < len(e.strings) {
+		str := e.strings[i]
+		fmt.Printf("%s", str)
+		return nil
+	}
+
+	return fmt.Errorf("invalid stack offset for string reference")
+}
+
 func (e *Eval) sub() error {
 	return e.binOp(func(n float64, m float64) float64 { return m - n })()
 }
