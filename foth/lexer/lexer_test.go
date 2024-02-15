@@ -82,6 +82,22 @@ func TestCommentNested(t *testing.T) {
 	}
 }
 
+// Escape characters
+func TestEscapeCharacters(t *testing.T) {
+
+	l := New("\"hello\n\r\t\r\\\"\\\\steve\"")
+
+	toks, err := l.Tokens()
+	if err != nil {
+		t.Fatalf("unexpected error %s", err.Error())
+	}
+
+	expect := "hello\n\r\t\r\"\\steve"
+	if toks[0].Value != expect {
+		t.Fatalf("unexpected value for string; got '%s' not '%s'", toks[0].Value, expect)
+	}
+}
+
 // Unterminated comments are a bug
 func TestCommentUnterminated(t *testing.T) {
 
