@@ -1018,8 +1018,8 @@ func (e *Eval) printNumber(n float64) {
 	e.printString(output)
 }
 
-// printString outputs a string - replacing "\n", etc, with the
-// real codes.
+// printString outputs a string, taking into account that
+// STDOUT might have been replaced via `SetWriter`.
 func (e *Eval) printString(str string) {
 
 	if e.STDOUT == nil {
