@@ -543,7 +543,7 @@ func (e *Eval) compileToken(token lexer.Token) error {
 
 		}
 
-		// output a string, in compiled form
+		// output a string-print operation, in compiled form
 		if token.Name == ".\"" {
 			e.strings = append(e.strings, token.Value)
 			e.tmp.Words = append(e.tmp.Words, -5)

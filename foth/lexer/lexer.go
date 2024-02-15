@@ -120,13 +120,48 @@ func (l *Lexer) Tokens() ([]Token, error) {
 			closed := false
 			val := ""
 			for offset < len(l.input) {
-				if l.input[offset] == '"' {
+				c := l.input[offset]
+
+				if c == '"' {
 					closed = true
 					offset++
 					break
-				} else {
-					val += string(l.input[offset])
 				}
+
+				// Handle \n, etc.
+				if c == '\\' {
+
+					// if there is another character
+					if offset+1 < len(l.input) {
+
+						// look at what it is
+						offset++
+						c := l.input[offset]
+
+						if c == 'n' {
+							c = '\n'
+						}
+						if c == 'r' {
+							c = '\r'
+						}
+						if c == 't' {
+							c = '\t'
+						}
+						if c == '"' {
+							c = '"'
+						}
+						if c == '\\' {
+							c = '\\'
+						}
+
+						val += string(c)
+						offset++
+						continue
+					}
+				}
+
+				// default
+				val += string(l.input[offset])
 				offset++
 			}
 
