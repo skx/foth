@@ -4,11 +4,11 @@ Part seven of the implementation is very similar to [part6](../part6/), the diff
 
 The specific problem we have is that our stack, and word definitions, only allow support for storing floating-point numbers.  So we cannot store a string on the stack, which means we must be indirect:
 
-* When we see a string we store it in an array of strings.
+* When we see a string we store it in an array of known strings.
 * We then push the offset of the new string entry onto the stack.
 * This allows it to be referenced and used.
 
-However because we don't have arbitrary read/write to RAM opcodes/words we can't do much more than that.  We've added two new string-specific words as a proof of concept though:
+However because we don't have arbitrary read/write to RAM opcodes/words we can't do much more than that.  We've added some new string-specific words as a proof of concept though:
 
 * `strlen` - Return the length of a string.
 * `strprn` - Print a string.
@@ -28,6 +28,9 @@ go build .
 5
 > steve strprn .
 steve
+> "test" strlen .
+4
+>
 ^D
 ```
 
@@ -35,9 +38,7 @@ steve
 
 ## Implementation
 
-The implementation here is pretty simple again, as suits a tutorial-code.
-
-The interpreter got a new string-storing area:
+The implementation here is pretty simple again, as suits tutorial-code.  The interpreter already had a string-storing area, added for the string-literal printing support:
 
 ```
 // Eval is our evaluation structure
@@ -55,6 +56,7 @@ In the past when we saw input we didn't recognize we assumed it was a number, an
 * Append the string to our storage array.
 * Push the offset of the new entry.
   * Using the magic -1 value, if we're in compiling mode.
+  * If you recall from [part4](../part4/) this is the magic word that allows a number to be read from the word's definition.
 
 From there there is no special support.  The primitives just read from the string area, for example `strlen` looks like this:
 
@@ -77,4 +79,4 @@ func (e *Eval) strlen() {
 
 ## Bugs
 
-Because we don't have a decent lexer we can only handle strings without spaces, or newlines.
+Because we don't have a decent lexer we can only handle strings without spaces, or newlines.  Our [final version](../foth/) corrects that problem, and adds support for `\t`, `\n`, etc.
