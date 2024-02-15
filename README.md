@@ -60,6 +60,7 @@ The end-result of this work is a simple scripting-language which you could easil
 * Support for printing the top-most stack element (`.`, or `print`).
 * Support for outputting ASCII characters (`emit`).
 * Support for outputting strings (`." Hello, World "`).
+  * Some additional string-support for counting lengths, etc.
 * Support for basic stack operations (`clearstack`, `drop`, `dup`, `over`, `swap`, `.s`)
 * Support for loops, via `do`/`loop`.
 * Support for conditional-execution, via `if`, `else`, and `then`.
@@ -80,7 +81,7 @@ You can find binary releases of the final-version upon the [project release page
 Either run this to download and install the binary:
 
 ```
-$ go get github.com/skx/foth/foth@v0.4.0
+$ go get github.com/skx/foth/foth@v0.5.0
 
 ```
 
@@ -110,7 +111,7 @@ This embeds the interpreter within an application, and defines some new words to
 
 ## Anti-Features
 
-The obvious omission from this implementation is support for strings in the general case (string support is limited to outputting a constant-string).
+The obvious omission from this implementation is support for strings in the general case (string support is pretty limited to calling strlen, and printing strings which are constant and "inline").
 
 We also lack the meta-programming facilities that FORTH users would expect, in a FORTH system it is possible to implement new control-flow systems, for example, by working with words and the control-flow directly.  Instead in this system these things are unavailable, and the implementation of IF/DO/LOOP/ELSE/THEN are handled in the golang-code in a way users cannot modify.
 
@@ -137,7 +138,8 @@ If **you** wanted to extend things further then there are some obvious things to
 
 * Adding more of the "standard" FORTH-words.
   * For example we're missing `pow`, etc.
-* Simplify the special-case handling of string-support.
+* Enhanced the string-support, to allow an input/read from the user, and other primitives.
+  * strcat, strstr, and similar C-like operations would be useful.
 * Simplify the conditional/loop handling.
   * Both of these probably involve using a proper return-stack.
   * This would have the side-effect of allowing new control-flow primitives to be added.
