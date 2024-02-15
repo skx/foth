@@ -85,7 +85,7 @@ func TestCommentNested(t *testing.T) {
 // Escape characters
 func TestEscapeCharacters(t *testing.T) {
 
-	l := New("\"hello\n\r\t\r\\\"\\\\steve\"")
+	l := New("\"hello\\n\\r\\t\\r\\\"\\\\steve\"")
 
 	toks, err := l.Tokens()
 	if err != nil {
