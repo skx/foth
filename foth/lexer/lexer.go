@@ -5,14 +5,44 @@ import (
 	"fmt"
 )
 
+// Type holds the type of a node
+type Type string
+
+// Types of tokens we return
+const (
+
+	// STRING is a string literal, enclosed in quotes.
+	// e.g. "Steve"
+	STRING = "string"
+
+	// PSTRING is a string literal, enclosed in quotes,
+	// which is printed to STDOUT when encountered.
+	// e.g. ."Steve"
+	PSTRING = "pstring"
+
+	// WORD is anything which is not a STRING or PSTRING.
+	//
+	// This includes words, numbers, and other symbols which
+	// are valid.
+	//
+	// The interpreter will internally convert the token `3.14'
+	// from a string to a number, when appropriate, for example,
+	// so we don't need an INTEGER/NUMBER type.
+	//
+	WORD = "word"
+)
+
 // Token is a single token.
 //
-// All our tokens have a name, only string-literals have a value which
-// is used for anything.
+// All our tokens have a name and type, only our two string-types have a value
+// which is used for anything.
 type Token struct {
 
 	// Name holds the name of the token.
 	Name string
+
+	// Type holds the token-type
+	Type Type
 
 	// For the case of a string-literal we store the value here.
 	Value string
@@ -54,7 +84,7 @@ func (l *Lexer) Tokens() ([]Token, error) {
 
 			// If we've built up a word then we save it away.
 			if len(cur) != 0 {
-				res = append(res, Token{Name: cur})
+				res = append(res, Token{Name: cur, Type: WORD})
 				cur = ""
 			}
 
@@ -79,7 +109,7 @@ func (l *Lexer) Tokens() ([]Token, error) {
 					c = l.input[l.offset+1]
 					d := int(c)
 					s := fmt.Sprintf("%d", d)
-					res = append(res, Token{Name: s})
+					res = append(res, Token{Name: s, Type: WORD})
 					l.offset += 2
 				} else {
 					return res, fmt.Errorf("syntax error")
@@ -124,7 +154,7 @@ func (l *Lexer) Tokens() ([]Token, error) {
 				return nil, err
 			}
 
-			res = append(res, Token{Name: "\"", Value: str})
+			res = append(res, Token{Name: "\"", Value: str, Type: STRING})
 
 			// This is for ." xxx "
 		case ".":
@@ -143,7 +173,7 @@ func (l *Lexer) Tokens() ([]Token, error) {
 						return nil, err
 					}
 
-					res = append(res, Token{Name: ".\"", Value: str})
+					res = append(res, Token{Name: ".\"", Value: str, Type: PSTRING})
 				} else {
 					cur = cur + "."
 				}
@@ -158,7 +188,7 @@ func (l *Lexer) Tokens() ([]Token, error) {
 
 	// end token?
 	if cur != "" {
-		res = append(res, Token{Name: cur})
+		res = append(res, Token{Name: cur, Type: WORD})
 	}
 
 	// All done.

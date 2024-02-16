@@ -279,7 +279,7 @@ func (e *Eval) Eval(input string) error {
 		}
 
 		// Is this an immediate print?  If so do it.
-		if tok == ".\"" {
+		if token.Type == lexer.PSTRING {
 			e.printString(token.Value)
 			continue
 		}
@@ -321,7 +321,7 @@ func (e *Eval) Eval(input string) error {
 			}
 
 			// String
-			if token.Name == "\"" {
+			if token.Type == lexer.STRING {
 				e.strings = append(e.strings, token.Value)
 				e.Stack.Push(float64(len(e.strings) - 1))
 				continue
