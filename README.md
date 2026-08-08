@@ -479,6 +479,12 @@ I've also played around with a couple of compilers which might be interesting to
   * [https://github.com/skx/bfcc/](https://github.com/skx/bfcc/)
 * A math-compiler:
   * [https://github.com/skx/math-compiler](https://github.com/skx/math-compiler)
+* A lisp compiler
+  * [https://github.com/skx/slisp](https://github.com/skx/slisp)
+
+There's also a standalone FORTH interpreter, written in assembly language for linux/amd64 here:
+
+* [https://github.com/skx/forth](https://github.com/skx/forth)
 
 
 
